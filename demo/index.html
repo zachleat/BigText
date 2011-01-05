@@ -1,0 +1,175 @@
+<!doctype html>
+<html>
+    <head>
+        <title>BigText Wizard</title>
+        <link type="text/css" href="css/jquery-ui-1.8rc3.custom.css" rel="stylesheet" />
+        <style>
+            #container {
+                margin-top: 100px;
+                -webkit-perspective: 600;
+            }
+            #bigtext {
+                -webkit-transform-style: preserve-3d;
+            }
+            #bigtext.animate3d {
+                -webkit-transition: 0.5s;
+            }
+            .csstransforms3d .no-3d-transforms-support {
+                display: none;
+            }
+            .bigtext {
+                margin: 0 auto;
+                width: 340px;
+                font-family: Helvetica, Arial;
+            }
+            #toolbar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 370px;
+                height: 100%;
+                background-color: #999;
+                padding: 20px;
+                text-align: center;
+            }
+            textarea,
+            select {
+                width: 100%;
+            }
+            #quote,
+            #font,
+            #customStyle {
+                height: 156px;
+            }
+            #quote {
+                text-align: center;
+            }
+            #customStyle {
+                font-family: 'Courier New';
+            }
+            #code {
+                font-size: 11px;
+                width: 100%;
+                padding: 10px 0;
+            }
+            #lineHeightSliders {}
+            #lineHeightSliders .ui-slider {
+                height: 80px;
+                display: inline-block;
+                margin: 0 10px;
+            }
+            #tabs .ui-tabs-panel {
+                height: 160px;
+            }
+            #random-3d,
+            #translate-buttons {
+                margin-top: 1em;
+            }
+            body { padding-left: 400px; }
+            body, textarea, h1, h2, h3 { font-family: Helvetica, Arial; }
+            .ui-slider { cursor: pointer; }
+            .ui-tabs { background-color: transparent; }
+            .ui-tabs .ui-tabs-panel { background-color: #fff; }
+            @media print {
+                #toolbar { display: none; }
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <div id="bigtext" class="bigtext">
+<div>&#147;DON'T ASK WHAT THE WORLD NEEDS.</div>
+<div>ASK WHAT MAKES YOU</div>
+<div>COME ALIVE</div>
+<div>AND GO DO IT.</div>
+<div>BECAUSE WHAT THE WORLD NEEDS</div>
+<div>IS PEOPLE WHO HAVE COME ALIVE.&#148; &#151; H. THURMAN</div>
+</div>
+        </div>
+        <div id="toolbar">
+            <div id="tabs"> 
+                <ul> 
+                    <li><a href="#tabs-1">Text</a></li> 
+                    <li><a href="#tabs-4">@font-face</a></li> 
+                    <li><a href="#tabs-2">Custom CSS</a></li> 
+                </ul> 
+                <div id="tabs-1"><textarea id="quote">&#147;DON'T ASK WHAT THE WORLD NEEDS.
+ASK WHAT MAKES YOU
+COME ALIVE
+AND GO DO IT.
+BECAUSE WHAT THE WORLD NEEDS
+IS PEOPLE WHO HAVE COME ALIVE.&#148; &#151; H. THURMAN</textarea></div>
+                <div id="tabs-2"><textarea id="customStyle">.bigtext { font-family: Helvetica, Arial; }
+.bigtext > div { line-height: 0.95em; }</textarea>
+</div> 
+
+                <div id="tabs-4">
+                    <select id="font" size="5">
+                        <option value="">(None, use Custom CSS)</option>
+                        <option value="Arimo">Arimo</option>
+                        <option value="Arvo">Arvo</option>
+                        <option value="IM Fell English">IM Fell English</option>
+                        <option value="LeagueGothicRegular" selected="selected">League Gothic</option>
+                        <option value="Droid Sans">Droid Sans</option>
+                        <option value="Molengo">Molengo</option>
+                        <option value="Puritan">Puritan</option>
+                        <option value="Yanone Kaffeesatz">Yanone Kaffeesatz</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="sizingTabs">
+                <ul> 
+                    <li><a href="#tabs-5">Width: <span id="posterWidth">340</span>px</a></li>
+                    <li><a href="#tabs-3">Line Height</a></li>
+                    <li><a href="#tabs-3d">3D</a></li>
+                </ul> 
+                <div id="tabs-5"><div id="widthSlider"></div></div>
+                <div id="tabs-3">
+                    <div id="lineHeightSliders"></div>
+                </div>
+                <div id="tabs-3d">
+                    <form>
+                        <div class="no-3d-transforms-support">
+                            <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
+                                <p>
+                                    <span class="ui-icon ui-icon-alert" style="float: left; margin-right: .4em;"></span> 
+                                    <strong>Darn.</strong> Your browser does not support 3d transforms, and the 3d stuff
+                                    here won't work for you. If you want to check it out, try Safari or a dev build of Chrome.
+                                </p>
+                            </div>
+                        </div>
+                        <label for="3d-x-slider">X: <input type="checkbox" id="3d-x-slider" class="dimension-slider"/></label>
+                        <label for="3d-y-slider">Y: <input type="checkbox" id="3d-y-slider" class="dimension-slider"/></label>
+                        <label for="3d-z-slider">Z: <input type="checkbox" id="3d-z-slider" class="dimension-slider"/></label>
+                        <label for="3d-animate-slider">Animate: <input type="checkbox" id="3d-animate-slider"/></label>
+                        <h3>Angle: <span id="3d-angle-value">0 degrees</span></h3>
+                        <div id="3d-angle-slider"></div>
+                        <button type="reset" id="reset-3d">Reset</button>
+                        <button type="button" id="random-3d">Random 3D Settings</button>
+                        <div id="translate-buttons">
+                            <h3>Translate</h3>
+                            <button type="button" id="translate-x-plus">+ X</button> <button type="button" id="translate-x-minus">- X</button>
+                            <button type="button" id="translate-y-plus">+ Y</button> <button type="button" id="translate-y-minus">- Y</button>
+                            <button type="button" id="translate-z-plus">+ Z</button> <button type="button" id="translate-z-minus">- Z</button>
+                        </div>
+                    </form>
+                </div>
+            </div> 
+            <br/>
+             <button type="button" id="refresh">Refresh</button>
+             <button type="button" id="sourceCode">Standalone Source Code</button>
+        </div>
+        <div id="dialog" title="Source Code"> 
+            <pre id="code"></pre>
+        </div> 
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/webfont/1/webfont.js"></script>
+        <script src="js/jquery.ba-throttle-debounce.min.js"></script>
+        <script src="js/modernizr-1.6.min.js"></script>
+        <script src="../bigtext.js"></script>
+        <script src="bigtextWizard.js"></script>
+    </body>
+</html>
