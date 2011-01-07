@@ -130,7 +130,12 @@ $.fn.bigtext = function(options)
 
         $t.find('> div').each(function(lineNumber)
         {
-            $(this).addClass(BigText.LINE_CLASS_PREFIX + lineNumber)
+            $(this).each(function()
+                {
+                    // remove existing line classes.
+                    this.className = this.className.replace(new RegExp('\\s*' + BigText.LINE_CLASS_PREFIX + '\\d+'), '');
+                })
+                .addClass(BigText.LINE_CLASS_PREFIX + lineNumber)
                 [maxwidth / fontSizes[lineNumber] < 80 ? 'addClass' : 'removeClass'](BigText.LINE_FOCUS_CLASS);
         });
     });

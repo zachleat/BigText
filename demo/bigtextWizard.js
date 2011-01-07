@@ -1,6 +1,7 @@
 var BigTextWizard = {
     LINE_HEIGHT_STYLE_ID: 'bigtext-wizard-lineheight-styleinjection',
     CUSTOM_STYLE_ID: 'bigtext-wizard-styleinjection',
+    DEFAULT_TEXT: '',
     loadedFonts: {},
     fontUrls: {
         'LeagueGothicRegular': 'css/league-gothic/stylesheet.css',
@@ -13,13 +14,20 @@ var BigTextWizard = {
         'Puritan': 'http://fonts.googleapis.com/css?family=Puritan',
         'IM Fell English': 'http://fonts.googleapis.com/css?family=IM+Fell+English'
     },
+    clear: function()
+    {
+        var cleared = $('<div/>').html(BigTextWizard.DEFAULT_TEXT);
+        $('#bigtext').empty().append(cleared).addClass('blurred');
+        BigTextWizard.init();
+        cleared.trigger('focus');
+    },
     _init: function()
     {
-        BigTextWizard.setCustomStyle();
+        var $bt = $('#bigtext');
+        $bt.bigtext();
 
-        var html = $('.bigtext').bigtext().html();
         BigTextWizard.initializeLineHeights();
-        BigTextWizard.setHtml(html);
+        BigTextWizard.initEditable.call($bt.find('> div'));
     },
     init: function()
     {
@@ -30,20 +38,52 @@ var BigTextWizard = {
             BigTextWizard.loadFont(fontFamily, BigTextWizard._init);
         }
     },
+    initEditable: function()
+    {
+        return this.attr({
+                contenteditable: true,
+                spellcheck: false
+            })
+            .unbind('keypress keyup, blur')
+            .bind('keypress', function(event) 
+            {
+                var $t = $(this);
+                if(event.which == 13) {
+                    var element;
+    
+                    if(!event.shiftKey) {
+                        element = $t.nextAll().eq(0);
+                        if(!element.length) {
+                            element = BigTextWizard.initEditable.call($('<div/>')).appendTo($t.parent());
+                        }
+                    } else {
+                        element = $t.prevAll().eq(0);
+                    }
+    
+                    element.trigger('focus');
+                    return false;
+                }
+            }).bind('keyup', function()
+            {
+                var $t = $(this);
+                if($t.text() && $t.text() != BigTextWizard.DEFAULT_TEXT) {
+                    $t.parent().removeClass('blurred');
+                }
+                
+                $t.parent().bigtext();
+            }).bind('blur', function()
+            {
+                var $t = $(this);
+                if(!$.trim($t.text()) && $t.siblings().length > 0) {
+                    $t.remove();
+                }
+
+                BigTextWizard.initializeLineHeights();
+            });
+    },
     generateStyleTag: function(id, css)
     {
         return $('<div/>').attr('id', id).html('<style>' + css.join('\n') + '</style>');
-    },
-    splitQuoteEvent: function(event)
-    {
-        var $bt = $('.bigtext').empty(),
-            quote = $(this).val().split('\n');
-
-        for(var j=0, k=quote.length; j<k; j++) {
-            $bt.append('<div>' + quote[j] + '</div>');
-        }
-
-        BigTextWizard.init();
     },
     transform3dEvent: function() {
         BigTextWizard.transform3d.call($('#bigtext'), $('#3d-x-slider').is(':checked') ? 1 : 0, $('#3d-y-slider').is(':checked') ? 1 : 0, $('#3d-z-slider').is(':checked') ? 1 : 0, $('#3d-angle-slider').slider('value') + 'deg');
@@ -73,7 +113,7 @@ var BigTextWizard = {
                                                                         (fontFace ? '\n.bigtext { font-family: \'' + fontFace + '\'; }' : '')])
                         .appendTo('head');
     },
-    setHtml: function(html)
+    setHtml: function()
     {
         function clean(html)
         {
@@ -96,7 +136,7 @@ var BigTextWizard = {
                         '</head>',
                         '<body>',
                         '<div class="bigtext">',
-                        (html || $('.bigtext').html()),
+                        $('#bigtext').html(),
                         '</div>',
                         '</body>',
                         '</html>'].join('\n')));
@@ -114,9 +154,12 @@ var BigTextWizard = {
     initializeLineHeights: function()
     {
         var $sliders = $('#lineHeightSliders'),
-            $lines = $('.bigtext > div');
+            $lines = $('#bigtext > div');
 
-        if(!$sliders.length && $sliders.length != $lines.length) {
+        if($lines.length < 2) {
+            $sliders.html('Add another line!');
+            return;
+        } else if($lines.length == $sliders.find('> div.ui-slider').length - 1) {
             return;
         }
 
@@ -138,7 +181,6 @@ var BigTextWizard = {
                 animate: true
             }).bind('slidechange', function() {
                 BigTextWizard.setLineHeightCss();
-                BigTextWizard.setHtml();
             });
         });
     }
@@ -146,21 +188,19 @@ var BigTextWizard = {
 
 
 $('#widthSlider').slider({
-    min: 320,
-    max: 600,
+    min: 260,
+    max: 1024,
     range: 'min',
-    value: 340
+    value: 430
 }).bind('slidechange', function() {
     var value = $(this).slider('value');
     $('#posterWidth').html(value);
-    $('.bigtext').width(value).find('div').each(function() {
+    $('#bigtext').width(value).find('div').each(function() {
         $(this).removeAttr('style').removeAttr('class');
     });
 
     BigTextWizard.init();
 });
-
-$('#quote').bind('keyup', $.throttle(100, BigTextWizard.splitQuoteEvent)).bind('change', BigTextWizard.splitQuoteEvent);
 
 $('#dialog').dialog({
     autoOpen: false,
@@ -173,12 +213,25 @@ $('#dialog').dialog({
     modal: true
 });
 
-$('#customStyle').bind('change', BigTextWizard.init);
+$('#customStyle').bind('change', function() {
+    BigTextWizard.setCustomStyle();
+    BigTextWizard.init();
+});
 
-$('#refresh').button().bind('click', BigTextWizard.init)
+$('#clear').button().bind('click', BigTextWizard.clear);
+
+$('#refresh').button().bind('click', BigTextWizard.init);
 
 $("#sourceCode").button().bind('click', function()
 {
+    var $divs = $('#bigtext > div');
+    $divs.removeAttr('contenteditable').removeAttr('spellcheck');
+    BigTextWizard.setHtml();
+    $divs.attr({
+                contenteditable: true,
+                spellcheck: false
+            });
+
     $('#dialog').dialog('open');
 
     return false;
@@ -189,11 +242,11 @@ $('#font').bind('change', function()
     BigTextWizard.init();
 });
 
-$('#tabs, #sizingTabs').tabs();
+$('#tabs').tabs();
 
 $('#3d-angle-slider').slider({
-    min: -85,
-    max: 85,
+    min: -70,
+    max: 70,
     range: 'min',
     value: 0,
     step: 1
@@ -275,5 +328,32 @@ $('#translate-buttons button').button().bind('click', function()
 
 $(window).bind('load', function()
 {
+    BigTextWizard.setCustomStyle();
     BigTextWizard.init();
+
+    $('#3d-animate-slider').trigger('click').trigger('change');
+}).bind('keydown', function(event) 
+{
+    if(event.ctrlKey && event.altKey) {
+        switch(event.which) {
+            case 90: // z
+                BigTextWizard.clear();
+                return false;
+            case 67: // c
+                $('body').toggleClass('bigtextWizardWhite').toggleClass('bigtextWizardBlack');
+                return false;
+            case 88: // x
+                $('#random-3d').trigger('click');
+                return false;
+            case 32: // space
+                $('#bigtext').fadeOut(function()
+                {
+                    BigTextWizard.clear();
+                    $('#random-3d').trigger('click');
+                    $('#bigtext').css('opacity', 1).show().find('> div').eq(0).focus();
+                });
+                
+                return false;
+        }
+    }
 });
