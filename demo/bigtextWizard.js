@@ -14,11 +14,11 @@ var BigTextWizard = {
         'Puritan': 'http://fonts.googleapis.com/css?family=Puritan',
         'IM Fell English': 'http://fonts.googleapis.com/css?family=IM+Fell+English'
     },
-    clear: function()
+    clear: function(ignoreFocus)
     {
         var cleared = $('<div/>').html(BigTextWizard.DEFAULT_TEXT);
-        $('#bigtext').empty().append(cleared).addClass('blurred');
-        BigTextWizard.init();
+        $('#bigtext').empty().append(cleared);
+        BigTextWizard._init();
         cleared.trigger('focus');
     },
     _init: function()
@@ -59,11 +59,18 @@ var BigTextWizard = {
                     } else {
                         element = $t.prevAll().eq(0);
                     }
-    
-                    element.trigger('focus');
+
+                    // IE8 wasn't letting focus here without a timeout.
+                    if($.browser.msie && $.browser.version <= 8) {
+                        window.setTimeout(function() {
+                            element.trigger('focus');
+                        }, 100);
+                    } else {
+                        element.trigger('focus');
+                    }
                     return false;
                 }
-            }).bind('keyup', function()
+            }).bind('keyup', $.throttle(250, function()
             {
                 var $t = $(this);
                 if($t.text() && $t.text() != BigTextWizard.DEFAULT_TEXT) {
@@ -71,7 +78,7 @@ var BigTextWizard = {
                 }
                 
                 $t.parent().bigtext();
-            }).bind('blur', function()
+            })).bind('blur', function()
             {
                 var $t = $(this);
                 if(!$.trim($t.text()) && $t.siblings().length > 0) {
@@ -86,11 +93,22 @@ var BigTextWizard = {
         return $('<div/>').attr('id', id).html('<style>' + css.join('\n') + '</style>');
     },
     transform3dEvent: function() {
-        BigTextWizard.transform3d.call($('#bigtext'), $('#3d-x-slider').is(':checked') ? 1 : 0, $('#3d-y-slider').is(':checked') ? 1 : 0, $('#3d-z-slider').is(':checked') ? 1 : 0, $('#3d-angle-slider').slider('value') + 'deg');
+        BigTextWizard.rotate3d.call($('#bigtext'), $('#3d-x-slider').is(':checked') ? 1 : 0, $('#3d-y-slider').is(':checked') ? 1 : 0, $('#3d-z-slider').is(':checked') ? 1 : 0, $('#3d-angle-slider').slider('value') + 'deg');
     },
-    transform3d: function(x, y, z, angle) {
+    rotate3d: function(x, y, z, angle) {
         // front: -90 < x, y < 90
-        $('#bigtext').css('-webkit-transform', 'rotate3d(' + x + ',' + y + ',' + z + ',' + angle + ')');
+        this.css('-webkit-transform', 'rotate3d(' + x + ',' + y + ',' + z + ',' + angle + ')');
+    },
+    translate: function(x, y, z)
+    {
+        var existingTransform = this.css('-webkit-transform') || ''; //rotate3d(0, 0, 0, 0deg)';
+
+        this.css('-webkit-transform', (existingTransform ? existingTransform + ' ' : '') +
+                                        'translate3d(' + (x ? x + 'px' : '0') + ',' + (y ? y + 'px' : '0') + ',' + (z ? z + 'px' : '0') + ')');
+    },
+    resetTransform: function()
+    {
+        $('#bigtext').css('-webkit-transform', '');
     },
     loadFont: function(fontFamily, callback)
     {
@@ -239,6 +257,7 @@ $("#sourceCode").button().bind('click', function()
 
 $('#font').bind('change', function()
 {
+    BigTextWizard.setCustomStyle();
     BigTextWizard.init();
 });
 
@@ -295,8 +314,6 @@ $('#random-3d').button().bind('click', function()
 $('#translate-buttons button').button().bind('click', function()
 {
     var id = $(this).attr('id'),
-        $bt = $('#bigtext'),
-        existingTransform = $bt.css('-webkit-transform'),
         AMOUNT = 200,
         x = 0,
         y = 0,
@@ -304,29 +321,34 @@ $('#translate-buttons button').button().bind('click', function()
 
     switch(id) {
         case 'translate-x-minus':
-            x = (-1*AMOUNT) + 'px';
+            x = -1*AMOUNT;
             break;
         case 'translate-x-plus':
-            x = AMOUNT + 'px';
+            x = AMOUNT;
             break;
         case 'translate-y-minus':
-            y = (-1*AMOUNT) + 'px';
+            y = -1*AMOUNT;
             break;
         case 'translate-y-plus':
-            y = AMOUNT + 'px';
+            y = AMOUNT;
             break;
         case 'translate-z-minus':
-            z = (-1*AMOUNT) + 'px';
+            z = -1*AMOUNT;
             break;
         case 'translate-z-plus':
-            z = AMOUNT + 'px';
+            z = AMOUNT;
             break;
     }
 
-    $bt.css('-webkit-transform', existingTransform + ' translate3d(' + x + ',' + y + ',' + z + ')');
+    BigTextWizard.translate.call($('#bigtext'), x, y, z);
 });
 
-$(window).bind('load', function()
+$(window).bind('click', function(event)
+{
+    if(!$(event.target).closest('#toolbar').length) {
+        $('#bigtext > div').eq(0).trigger('focus');
+    }
+}).bind('load', function()
 {
     BigTextWizard.setCustomStyle();
     BigTextWizard.init();
@@ -334,7 +356,10 @@ $(window).bind('load', function()
     $('#3d-animate-slider').trigger('click').trigger('change');
 }).bind('keydown', function(event) 
 {
+    // Keyboard shortcuts
     if(event.ctrlKey && event.altKey) {
+        var $bigtext = $('#bigtext');
+
         switch(event.which) {
             case 90: // z
                 BigTextWizard.clear();
@@ -345,13 +370,28 @@ $(window).bind('load', function()
             case 88: // x
                 $('#random-3d').trigger('click');
                 return false;
+            case 37: // left arrow
+                BigTextWizard.rotate3d.call($bigtext, 0, 0, 1, '-90deg');
+                return false;
+            case 39: // right arrow
+                BigTextWizard.rotate3d.call($bigtext, 0, 0, 1, '90deg');
+                return false;
+            case 82: // r
+                $('#reset-3d').trigger('click');
+                return false;
             case 32: // space
-                $('#bigtext').fadeOut(function()
+            case 13: // enter
+                $bigtext.removeClass('fadeIn').addClass('fadeOut');
+                    //.find('> div').eq(0).trigger('focus');
+
+                window.setTimeout(function()
                 {
+                    if(event.which == 32) {
+                        $('#random-3d').trigger('click');
+                    }
                     BigTextWizard.clear();
-                    $('#random-3d').trigger('click');
-                    $('#bigtext').css('opacity', 1).show().find('> div').eq(0).focus();
-                });
+                    $bigtext.removeClass('fadeOut').addClass('fadeIn');
+                }, 200);
                 
                 return false;
         }
