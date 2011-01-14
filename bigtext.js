@@ -2,7 +2,7 @@ var BigText = {
     STARTING_PX_FONT_SIZE: 11,
     DEFAULT_MAX_FONT_SIZE_EM: 48,
     GLOBAL_STYLE_ID: 'bigtext-style',
-    STYLE_ID: 'bigtext-styleinjection',
+    STYLE_ID: 'bigtext-id',
     LINE_CLASS_PREFIX: 'bigtext-line',
     LINE_FOCUS_CLASS: 'bigtext-focus',
     DEFAULT_CHILD_SELECTOR: '> div',
@@ -11,27 +11,33 @@ var BigText = {
         ol: '> li',
         ul: '> li'
     },
+    counter: 0,
     init: function($head)
     {
         if(!$('#'+BigText.GLOBAL_STYLE_ID).length) {
             $head.append(BigText.generateStyleTag(BigText.GLOBAL_STYLE_ID, ['.bigtext { font-size: ' + BigText.STARTING_PX_FONT_SIZE + 'px; }']));
         }
     },
+    getStyleId: function(elementId)
+    {
+        return BigText.STYLE_ID + '-' + elementId;
+    },
     generateStyleTag: function(id, css)
     {
         return $('<style>' + css.join('\n') + '</style>').attr('id', id);
     },
-    generateFontSizeCss: function(linesFontSizes, lineWordSpacings)
+    generateFontSizeCss: function(elementId, linesFontSizes, lineWordSpacings)
     {
-        var css = [];
+        var css = [],
+            styleId = BigText.getStyleId(elementId);
 
         for(var j=0, k=linesFontSizes.length; j<k; j++) {
-            css.push('.' + BigText.LINE_CLASS_PREFIX + j + ' { font-size: ' + linesFontSizes[j] + 'em;' + 
+            css.push('#' + elementId + ' .' + BigText.LINE_CLASS_PREFIX + j + ' { font-size: ' + linesFontSizes[j] + 'em;' + 
                 (lineWordSpacings[j] ? ' word-spacing: ' + lineWordSpacings[j] + 'px;' : '') + ' }');
         }
 
-        $('#' + BigText.STYLE_ID).remove();
-        return BigText.generateStyleTag(BigText.STYLE_ID, css);
+        $('#' + styleId).remove();
+        return BigText.generateStyleTag(styleId, css);
     },
     testLineDimensions: function($line, maxwidth, property, size, interval, units)
     {
@@ -60,6 +66,7 @@ $.fn.bigtext = function(options)
     return this.each(function()
     {
         var $t = $(this).addClass('bigtext'),
+            id = $t.attr('id'),
             childSelector = options.childSelector ||
                         BigText.childSelectors[this.tagName.toLowerCase()] ||
                         BigText.DEFAULT_CHILD_SELECTOR,
@@ -75,7 +82,13 @@ $.fn.bigtext = function(options)
                             top: -9999
                         }).appendTo(document.body);
 
-        $('#' + BigText.STYLE_ID).remove();
+        if(!id) {
+            id = 'bigtext-id' + (BigText.counter++);
+            $t.attr('id', id);
+        }
+
+        var styleId = BigText.getStyleId(id);
+        $('#' + styleId).remove();
 
         // font-size isn't the only thing we can modify, we can also mess with:
         // word-spacing and letter-spacing.
@@ -134,7 +147,7 @@ $.fn.bigtext = function(options)
             wordSpacings.push(wordSpacing);
         }).removeAttr('style');
 
-        $headCache.append(BigText.generateFontSizeCss(fontSizes, wordSpacings));
+        $headCache.append(BigText.generateFontSizeCss(id, fontSizes, wordSpacings));
 
         $c.remove();
 

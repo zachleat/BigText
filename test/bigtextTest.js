@@ -22,7 +22,7 @@ BigTextTest.prototype.testStyleInjection = function()
     $(document.body).append('<div id="test" style="width:600px"><div>This is a simple test.</div></div>');
     $('#test').bigtext();
 
-    assertTrue('Test to make sure the style tag was inserted.', $('#' + BigText.STYLE_ID).length === 1);
+    assertTrue('Test to make sure the style tag was inserted.', $('#' + BigText.getStyleId('test')).length === 1);
 };
 
 BigTextTest.prototype.testDoubleStyleInjection = function()
@@ -30,7 +30,8 @@ BigTextTest.prototype.testDoubleStyleInjection = function()
     $(document.body).append('<div id="test" style="width:600px"><div>This is a simple test.</div></div>');
     $('#test').bigtext().bigtext();
 
-    assertTrue('Test to make sure the style tag wasn\'t inserted twice.', $('#' + BigText.STYLE_ID).length === 1);
+    // FIXME this jQuery result won't return more than one element.
+    assertTrue('Test to make sure the style tag wasn\'t inserted twice.', $('#' + BigText.getStyleId('test')).length === 1);
 };
 
 
@@ -94,9 +95,24 @@ BigTextTest.prototype.testThreeLinesWithAList = function()
 {
     $(document.body).append('<ol id="test" style="width:600px"><li>This is</li><li>a longer second line</li><li>An even longer third line.</li></ol>');
 
-    this.linesTest('#test', {children: 'li'});
+    this.linesTest('#test');
 };
 
+BigTextTest.prototype.testTwoElements = function()
+{
+    $(document.body).append('<div id="test" style="width:600px"><div>This is</div><div>a longer second line</div></div><div id="test2" style="width:400px"><div>This is</div><div>a longer second line</div></div>');
+
+    this.linesTest('#test');
+    this.linesTest('#test2');
+
+    assertNotEquals('Line 1 of each is a different size.',
+                        $('#test').find('> div').eq(0).css('font-size'),
+                        $('#test2').find('> div').eq(0).css('font-size'));
+
+    assertNotEquals('Line 2 of each is a different size.',
+                        $('#test').find('> div').eq(1).css('font-size'),
+                        $('#test2').find('> div').eq(1).css('font-size'));
+};
 
 BigTextTest.prototype.testMaxFontSize = function()
 {
