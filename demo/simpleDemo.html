@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <title>BigText on a List</title>
+        <style>
+            ol {
+                width: 400px;
+                list-style-type: none;
+            }
+        </style>
+    </head>
+    <body>
+        <ol>
+            <li><a href="/xmas">Merry Christmas</a></li>
+            <li><a href="/soulwax">Soulwax</a></li>
+            <li><a href="/grapevinegame">The Grapevine Game</a></li>
+            <li><a href="/ticktalk">Tick Talk</a></li>
+        </ol>
+
+        <ol>
+            <li>Merry Christmas</li>
+            <li>Soulwax</li>
+            <li>The Grapevine Game</li>
+            <li>Tick Talk</li>
+        </ol>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js"></script>
+        <script src="../bigtext.js"></script>
+        <script>
+        $('ol').bigtext();
+        </script>
+    </body>
+</html>

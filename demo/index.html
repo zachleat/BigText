@@ -1,13 +1,14 @@
 <!doctype html>
-<html>
+<html lang="en">
     <head>
+        <meta charset="utf-8"/>
         <title>BigText Wizard</title>
         <link type="text/css" href="css/jquery-ui-1.8rc3.custom.css" rel="stylesheet" />
         <link type="text/css" href="css/flexbox.css" rel="stylesheet" />
         <link type="text/css" href="bigtextWizard.css" rel="stylesheet" />
     </head>
     <body class="bigtextWizardWhite">
-        <div class="hbox center" style="height: 100%; width: 100%">
+        <div id="centered" class="hbox center">
             <div class="vbox center">
                 <div id="container">
                     <div id="bigtext" class="bigtext blurred"><div>EDIT ME</div></div>
@@ -76,13 +77,7 @@
                         </div>
                     </form>
                 </div>
-            </div> 
-<!--            <div class="ui-state-highlight ui-corner-all info-box" id="hint"> 
-                <p>
-                    <span class="ui-icon ui-icon-info"></span>
-                    <strong>Hint:</strong> Try editing the text!
-                </p>
-            </div>-->
+            </div>
             <div>
                 <button type="button" id="refresh">Refresh</button>
                 <button type="button" id="sourceCode">Source Code</button>

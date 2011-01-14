@@ -5,6 +5,12 @@ var BigText = {
     STYLE_ID: 'bigtext-styleinjection',
     LINE_CLASS_PREFIX: 'bigtext-line',
     LINE_FOCUS_CLASS: 'bigtext-focus',
+    DEFAULT_CHILD_SELECTOR: '> div',
+    childSelectors: {
+        div: '> div',
+        ol: '> li',
+        ul: '> li'
+    },
     init: function($head)
     {
         if(!$('#'+BigText.GLOBAL_STYLE_ID).length) {
@@ -13,7 +19,7 @@ var BigText = {
     },
     generateStyleTag: function(id, css)
     {
-        return $('<div/>').attr('id', id).html('<style>' + css.join('\n') + '</style>');
+        return $('<style>' + css.join('\n') + '</style>').attr('id', id);
     },
     generateFontSizeCss: function(linesFontSizes, lineWordSpacings)
     {
@@ -47,12 +53,16 @@ $.fn.bigtext = function(options)
     BigText.init($headCache);
 
     options = $.extend({
-                maxfontsize: BigText.DEFAULT_MAX_FONT_SIZE_EM
+                maxfontsize: BigText.DEFAULT_MAX_FONT_SIZE_EM,
+                childSelector: ''
             }, options || {});
 
     return this.each(function()
     {
         var $t = $(this).addClass('bigtext'),
+            childSelector = options.childSelector ||
+                        BigText.childSelectors[this.tagName.toLowerCase()] ||
+                        BigText.DEFAULT_CHILD_SELECTOR,
             maxwidth = $t.width(),
             $c = $t.clone(true)
                         .addClass('bigtext-cloned')
@@ -74,7 +84,7 @@ $.fn.bigtext = function(options)
         var fontSizes = [],
             wordSpacings = [];
 
-        $c.find('> div').css({
+        $c.find(childSelector).css({
             float: 'left',
             clear: 'left'
         }).each(function(lineNumber) {
@@ -128,7 +138,7 @@ $.fn.bigtext = function(options)
 
         $c.remove();
 
-        $t.find('> div').each(function(lineNumber)
+        $t.find(childSelector).each(function(lineNumber)
         {
             $(this).each(function()
                 {
