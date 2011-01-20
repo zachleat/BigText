@@ -43,18 +43,20 @@ BigTextTest.prototype.testCleanup = function()
     assertTrue('Clone should be deleted.', $('.bigtext-cloned').length === 0);
 };
 
-BigTextTest.prototype.linesTest = function(selector, options)
+BigTextTest.prototype.linesTest = function(selector, expectedWidth, options)
 {
-    var TOLERANCE = this.tolerance,
+    var minWidth = expectedWidth - this.tolerance,
+        maxWidth = expectedWidth + this.tolerance,
+        options = options || {},
         $test = $(selector),
-        $lines = $test.find('> ' + BigText.CHILD_BLOCK_ELEMENT);
+        $lines = $test.find(options.childSelector || '> *');
 
     this.init.call($lines);
 
     $lines.each(function(j)
     {
         var width = $(this).width();
-        assertFalse('Line ' + j + ' is not max width.', (600 - TOLERANCE) < width && width < (600 + TOLERANCE));
+        assertFalse('Line ' + j + ' is not max width (' + width + ')', minWidth < width && width < maxWidth);
     });
 
     $test.bigtext(options);
@@ -63,10 +65,12 @@ BigTextTest.prototype.linesTest = function(selector, options)
 
     $lines.each(function(j)
     {
-        var $t = $(this);
+        var $t = $(this),
+            width = $t.width();
+
         assertTrue('Line ' + j + ' class added.', $t.is('.bigtext-line' + j));
         assertTrue('Line ' + j + ' Font size must be larger than the starting pixel size', parseInt($t.css('font-size'), 10) > BigText.STARTING_PX_FONT_SIZE);
-        assertTrue('Line ' + j + ' width should be about 600px.', (600 - TOLERANCE) < $t.width() && $t.width() < (600 + TOLERANCE));
+        assertTrue('Line ' + j + ' width should be about ' + expectedWidth + 'px (' + $t.width() + ')', minWidth < width && width < maxWidth);
     });
 };
 
@@ -74,36 +78,36 @@ BigTextTest.prototype.testOneLine = function()
 {
     $(document.body).append('<div id="test" style="width:600px"><div>This is a single line.</div></div>');
 
-    this.linesTest('#test');
+    this.linesTest('#test', 600);
 };
 
 BigTextTest.prototype.testTwoLines = function()
 {
     $(document.body).append('<div id="test" style="width:600px"><div>This is</div><div>a longer second line</div></div>');
 
-    this.linesTest('#test');
+    this.linesTest('#test', 600);
 };
 
 BigTextTest.prototype.testThreeLines = function()
 {
     $(document.body).append('<div id="test" style="width:600px"><div>This is</div><div>a longer second line</div><div>An even longer third line.</div></div>');
 
-    this.linesTest('#test');
+    this.linesTest('#test', 600);
 };
 
 BigTextTest.prototype.testThreeLinesWithAList = function()
 {
     $(document.body).append('<ol id="test" style="width:600px"><li>This is</li><li>a longer second line</li><li>An even longer third line.</li></ol>');
 
-    this.linesTest('#test');
+    this.linesTest('#test', 600);
 };
 
 BigTextTest.prototype.testTwoElements = function()
 {
     $(document.body).append('<div id="test" style="width:600px"><div>This is</div><div>a longer second line</div></div><div id="test2" style="width:400px"><div>This is</div><div>a longer second line</div></div>');
 
-    this.linesTest('#test');
-    this.linesTest('#test2');
+    this.linesTest('#test', 600);
+    this.linesTest('#test2', 400);
 
     assertNotEquals('Line 1 of each is a different size.',
                         $('#test').find('> div').eq(0).css('font-size'),
@@ -112,6 +116,20 @@ BigTextTest.prototype.testTwoElements = function()
     assertNotEquals('Line 2 of each is a different size.',
                         $('#test').find('> div').eq(1).css('font-size'),
                         $('#test2').find('> div').eq(1).css('font-size'));
+};
+
+BigTextTest.prototype.testPercentageWidth = function()
+{
+    $(document.body).append('<div style="width: 600px"><div id="test" style="width: 50%"><div>This is a single line.</div></div></div>');
+
+    this.linesTest('#test', 300);
+};
+
+BigTextTest.prototype.testNoChildren = function()
+{
+    $(document.body).append('<div id="test" style="width: 600px">This is a single line.</div>');
+
+    this.linesTest('#test', 300);
 };
 
 BigTextTest.prototype.testMaxFontSize = function()
