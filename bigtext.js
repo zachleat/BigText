@@ -8,6 +8,7 @@
         STYLE_ID: 'bigtext-id',
         LINE_CLASS_PREFIX: 'bigtext-line',
         LINE_FOCUS_CLASS: 'bigtext-focus',
+        EXEMPT_CLASS: 'bigtext-exempt',
         DEFAULT_CHILD_SELECTOR: '> div',
         childSelectors: {
             div: '> div',
@@ -36,7 +37,8 @@
                 styleId = BigText.getStyleId(elementId);
     
             for(var j=0, k=linesFontSizes.length; j<k; j++) {
-                css.push('#' + elementId + ' .' + BigText.LINE_CLASS_PREFIX + j + ' { font-size: ' + linesFontSizes[j] + 'em;' + 
+                css.push('#' + elementId + ' .' + BigText.LINE_CLASS_PREFIX + j + ' {' + 
+                    (linesFontSizes[j] ? ' font-size: ' + linesFontSizes[j] + 'em;' : '') + 
                     (lineWordSpacings[j] ? ' word-spacing: ' + lineWordSpacings[j] + 'px;' : '') + ' }');
             }
     
@@ -136,7 +138,12 @@
                     intervals = [16,8,4,2,1,.1,.01],
                     fontMatch = 1,
                     lineMax;
-    
+
+                if($line.hasClass(BigText.EXEMPT_CLASS)) {
+                    fontSizes.push(null);
+                    return;
+                }
+
                 for(var m=0, n=intervals.length; m<n; m++) {
                     inner: for(var j=1, k=10; j<=k; j++) {
                         lineMax = BigText.testLineDimensions($line, maxwidth, 'font-size', fontMatch + j*intervals[m], intervals[m], 'em');
@@ -162,7 +169,12 @@
                     wordSpacing = 0,
                     interval = 1,
                     maxWordSpacing;
-    
+
+                if($line.hasClass(BigText.EXEMPT_CLASS)) {
+                    wordSpacings.push(null);
+                    return;
+                }
+
                 // must re-use font-size, even though it was removed above.
                 $line.css('font-size', fontSizes[lineNumber] + 'em');
     

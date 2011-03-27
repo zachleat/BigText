@@ -56,7 +56,7 @@ BigTextTest.prototype.linesTest = function(selector, expectedWidth, options)
     $lines.each(function(j)
     {
         var width = $(this).width();
-        assertFalse('Line ' + j + ' is not max width (' + width + ')', minWidth < width && width < maxWidth);
+        assertFalse('Line ' + j + ' is not max width (' + minWidth + ' < ' + width + ' < ' + maxWidth + ')', minWidth < width && width < maxWidth);
     });
 
     $test.bigtext(options);
@@ -69,8 +69,12 @@ BigTextTest.prototype.linesTest = function(selector, expectedWidth, options)
             width = $t.width();
 
         assertTrue('Line ' + j + ' class added.', $t.is('.bigtext-line' + j));
-        assertTrue('Line ' + j + ' Font size must be larger than the starting pixel size', parseInt($t.css('font-size'), 10) > BigText.STARTING_PX_FONT_SIZE);
-        assertTrue('Line ' + j + ' width should be about ' + expectedWidth + 'px (' + $t.width() + ')', minWidth < width && width < maxWidth);
+        if($t.hasClass(BigText.EXEMPT_CLASS)) {
+            assertTrue('Line ' + j + ' Font size must be unchanged', parseInt($t.css('font-size'), 10) == BigText.STARTING_PX_FONT_SIZE);
+        } else {
+            assertTrue('Line ' + j + ' Font size must be larger than the starting pixel size', parseInt($t.css('font-size'), 10) > BigText.STARTING_PX_FONT_SIZE);
+            assertTrue('Line ' + j + ' width should be about ' + expectedWidth + 'px (' + $t.width() + ')', minWidth < width && width < maxWidth);
+        }
     });
 };
 
@@ -146,4 +150,11 @@ BigTextTest.prototype.testUnbrokenSingleWord = function()
     $('#test').bigtext();
 
     assertTrue('Font size must be larger than the starting pixel size.', parseInt($('#test > div').css('font-size'), 10) > BigText.STARTING_PX_FONT_SIZE);
+};
+
+BigTextTest.prototype.testTwoLinesButOneExempt = function()
+{
+    $(document.body).append('<div id="test" style="width:400px"><div>This is</div><div class="bigtext-exempt">a longer second line</div></div>');
+
+    this.linesTest('#test', 400);
 };
