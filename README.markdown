@@ -24,7 +24,7 @@ Examples
     <ol id="bigtext">
         <li>BIGTEXT</li>
         <li>Makes Text Big</li>
-    </li>
+    </ol>
     <script>
     $('#bigtext').bigtext();
     </script>
@@ -46,7 +46,7 @@ Examples
     <ol id="bigtext">
         <li>BIGTEXT</li>
         <li class="bigtext-exempt">Makes Text Big</li>
-    </li>
+    </ol>
     <script>
     $('#bigtext').bigtext();
     </script>
