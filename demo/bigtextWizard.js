@@ -220,17 +220,6 @@ $('#widthSlider').slider({
     BigTextWizard.init();
 });
 
-$('#dialog').dialog({
-    autoOpen: false,
-    width: 500,
-    buttons: {
-        "OK": function() { 
-            $(this).dialog("close"); 
-        }
-    },
-    modal: true
-});
-
 $('#customStyle').bind('change', function() {
     BigTextWizard.setCustomStyle();
     BigTextWizard.init();
@@ -239,21 +228,6 @@ $('#customStyle').bind('change', function() {
 $('#clear').button().bind('click', BigTextWizard.clear);
 
 $('#refresh').button().bind('click', BigTextWizard.init);
-
-$("#sourceCode").button().bind('click', function()
-{
-    var $divs = $('#bigtext > div');
-    $divs.removeAttr('contenteditable').removeAttr('spellcheck');
-    BigTextWizard.setHtml();
-    $divs.attr({
-                contenteditable: true,
-                spellcheck: false
-            });
-
-    $('#dialog').dialog('open');
-
-    return false;
-});
 
 $('#font').bind('change', function()
 {

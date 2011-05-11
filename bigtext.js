@@ -20,7 +20,7 @@
         init: function($head)
         {
             if(!$('#'+BigText.GLOBAL_STYLE_ID).length) {
-                $head.append(BigText.generateStyleTag(BigText.GLOBAL_STYLE_ID, ['.bigtext { font-size: ' + BigText.STARTING_PX_FONT_SIZE + 'px; }']));
+                $head.append(BigText.generateStyleTag(BigText.GLOBAL_STYLE_ID, ['.bigtext, .bigtext .' + BigText.EXEMPT_CLASS + ' { font-size: ' + BigText.STARTING_PX_FONT_SIZE + 'px; }']));
             }
         },
         getStyleId: function(elementId)
@@ -85,14 +85,15 @@
                 maxwidth = $t.width(),
                 $c = $t.clone(true)
                             .addClass('bigtext-cloned')
-                            .removeAttr('id')
+                            //.removeAttr('id')
                             .css({
                                 'min-width': parseInt(maxwidth, 10),
                                 width: 'auto',
                                 position: 'absolute',
                                 left: -9999,
                                 top: -9999
-                            }).appendTo(document.body);
+                            }).appendTo(document.body),
+                dataKey;
 
             if(!id) {
                 id = 'bigtext-id' + (BigText.counter++);
@@ -100,13 +101,14 @@
             }
 
             if(options.resize) {
+                dataKey = BigText.DATA_KEY + '_' + id;
                 // Cache options, used in BigText.resizeFunction
-                $t.data(BigText.DATA_KEY, options);
+                $t.data(dataKey, options);
 
                 function resizeFunction()
                 {
                     var $t = $('#'+id);
-                    $t.bigtext($t.data(BigText.DATA_KEY));
+                    $t.bigtext($t.data(dataKey));
                 }
 
                 if($.isFunction(options.bindResize)) {

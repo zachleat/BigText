@@ -45,8 +45,9 @@ BigTextTest.prototype.testCleanup = function()
 
 BigTextTest.prototype.linesTest = function(selector, expectedWidth, options)
 {
-    var minWidth = expectedWidth - this.tolerance,
-        maxWidth = expectedWidth + this.tolerance,
+    var tolerance = this.tolerance,
+        minWidth = expectedWidth - tolerance,
+        maxWidth = expectedWidth + tolerance,
         options = options || {},
         $test = $(selector),
         $lines = $test.find(options.childSelector || '> *');
@@ -66,14 +67,20 @@ BigTextTest.prototype.linesTest = function(selector, expectedWidth, options)
     $lines.each(function(j)
     {
         var $t = $(this),
-            width = $t.width();
+            width = $t.width(),
+            height = $t.height(),
+            fontSize = parseInt($t.css('font-size'), 10),
+            expectedHeight = $('<div>A</div>').css('font-size', fontSize).appendTo(document.body).height(),
+            minHeight = expectedHeight - tolerance,
+            maxHeight = expectedHeight + tolerance;
 
         assertTrue('Line ' + j + ' class added.', $t.is('.bigtext-line' + j));
         if($t.hasClass(BigText.EXEMPT_CLASS)) {
-            assertTrue('Line ' + j + ' Font size must be unchanged', parseInt($t.css('font-size'), 10) == BigText.STARTING_PX_FONT_SIZE);
+            assertTrue('Line ' + j + ' Font size must be unchanged', fontSize == BigText.STARTING_PX_FONT_SIZE);
         } else {
-            assertTrue('Line ' + j + ' Font size must be larger than the starting pixel size', parseInt($t.css('font-size'), 10) > BigText.STARTING_PX_FONT_SIZE);
-            assertTrue('Line ' + j + ' width should be about ' + expectedWidth + 'px (' + $t.width() + ')', minWidth < width && width < maxWidth);
+            assertTrue('Line ' + j + ' Font size must be larger than the starting pixel size', fontSize > BigText.STARTING_PX_FONT_SIZE);
+            assertTrue('Line ' + j + ' width should be about ' + expectedWidth + 'px (' + width + ')', minWidth < width && width < maxWidth);
+            assertTrue('Line ' + j + ' height should be about ' + expectedHeight + 'px (' + minHeight + ' < ' + height + ' < ' + maxHeight + ')', minHeight < height && height < maxHeight);
         }
     });
 };
@@ -141,7 +148,7 @@ BigTextTest.prototype.testMaxFontSize = function()
     $(document.body).append('<div id="test" style="width:600px"><div>1</div></div>');
     $('#test').bigtext();
 
-    assertEquals('Font size should equal the maximum.', $('#test > div').css('font-size'), BigText.STARTING_PX_FONT_SIZE * BigText.DEFAULT_MAX_FONT_SIZE_EM + 'px');
+    assertEquals('Font size should equal the maximum.', (BigText.STARTING_PX_FONT_SIZE * BigText.DEFAULT_MAX_FONT_SIZE_EM) + 'px', $('#test > div').css('font-size'));
 };
 
 BigTextTest.prototype.testUnbrokenSingleWord = function()
@@ -157,4 +164,11 @@ BigTextTest.prototype.testTwoLinesButOneExempt = function()
     $(document.body).append('<div id="test" style="width:400px"><div>This is</div><div class="bigtext-exempt">a longer second line</div></div>');
 
     this.linesTest('#test', 400);
+};
+
+BigTextTest.prototype.testIdCssSelectorStyle = function()
+{
+    $(document.body).append('<style>#test { width: 600px; font-weight: bold; }</style><div id="test"><div>This is a single line.</div></div>');
+
+    this.linesTest('#test', 600);
 };
