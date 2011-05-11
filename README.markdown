@@ -106,9 +106,6 @@ BigText does not implement its own debounced resize event, to reduce duplicate c
 Common Problems
 ----------------------------
 
-### ID CSS Styling
-Do not use #your-id CSS rules to style. BigText clones the element to size it off-document, and does not maintain the ID attribute for the clone.
-
 ### Lines Wrapping Pre-BigText
 The starting font-size must be small enough to guarantee that each individual line is not wrapping pre-BigText.  Adjust the amount of text per line, or set the starting font size using the example below.
 
