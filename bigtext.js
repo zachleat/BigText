@@ -85,7 +85,6 @@
                 maxwidth = $t.width(),
                 $c = $t.clone(true)
                             .addClass('bigtext-cloned')
-                            //.removeAttr('id')
                             .css({
                                 'min-width': parseInt(maxwidth, 10),
                                 width: 'auto',
