@@ -5,8 +5,16 @@
         <title>BigText on a List</title>
         <style>
             ol {
-                width: 400px;
+                width: 100%;
                 list-style-type: none;
+                -moz-box-sizing: border-box;
+                -webkit-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+            @media (min-width: 800px) {
+                ol {
+                    width: 600px;
+                }
             }
         </style>
     </head>

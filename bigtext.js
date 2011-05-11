@@ -67,10 +67,6 @@
         options = $.extend({
                     maxfontsize: BigText.DEFAULT_MAX_FONT_SIZE_EM,
                     childSelector: '',
-                    /* function(onResizeFunction) { 
-                     *     $(window).unbind('resize.bigtext').bind('resize', onResizeFunction);
-                     * }
-                     */
                     bindResize: null,
                     resize: true
                 }, options || {});
@@ -92,32 +88,36 @@
                                 left: -9999,
                                 top: -9999
                             }).appendTo(document.body),
-                dataKey;
+                eventNamespace,
+                eventName;
 
             if(!id) {
                 id = 'bigtext-id' + (BigText.counter++);
+                eventNamespace = id;
                 $t.attr('id', id);
+            } else {
+                eventNamespace = 'bigtext-' + id;
             }
 
             if(options.resize) {
-                dataKey = BigText.DATA_KEY + '_' + id;
-                // Cache options, used in BigText.resizeFunction
-                $t.data(dataKey, options);
-
                 function resizeFunction()
                 {
-                    var $t = $('#'+id);
-                    $t.bigtext($t.data(dataKey));
+                    $('#'+id).bigtext(options);
                 }
+
+                eventName = 'resize.' + eventNamespace;
 
                 if($.isFunction(options.bindResize)) {
                     options.bindResize(resizeFunction);
                 } else if($.throttle) {
                     // https://github.com/cowboy/jquery-throttle-debounce
-                    $(window).unbind('resize.bigtext').bind('resize.bigtext', $.throttle(100, resizeFunction));
+                    $(window).unbind(eventName).bind(eventName, $.throttle(100, resizeFunction));
                 } else if($.fn.smartresize) {
                     // https://github.com/lrbabe/jquery-smartresize/
-                    $(window).unbind('smartresize.bigtext').bind('smartresize.bigtext', resizeFunction);
+                    eventName = 'smartresize.' + eventNamespace;
+                    $(window).unbind(eventName).bind(eventName, resizeFunction);
+                } else {
+                    $(window).unbind(eventName).bind(eventName, resizeFunction);
                 }
             }
 
