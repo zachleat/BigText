@@ -148,7 +148,7 @@ BigTextTest.prototype.testMaxFontSize = function()
     $(document.body).append('<div id="test" style="width:600px"><div>1</div></div>');
     $('#test').bigtext();
 
-    assertEquals('Font size should equal the maximum.', (BigText.STARTING_PX_FONT_SIZE * BigText.DEFAULT_MAX_FONT_SIZE_EM) + 'px', $('#test > div').css('font-size'));
+    assertEquals('Font size should equal the maximum.', BigText.DEFAULT_MAX_FONT_SIZE_PX + 'px', $('#test > div').css('font-size'));
 };
 
 BigTextTest.prototype.testUnbrokenSingleWord = function()
