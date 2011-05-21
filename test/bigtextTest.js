@@ -1,6 +1,6 @@
 BigTextTest = TestCase('BigTextTest');
 
-BigTextTest.prototype.tolerance = 8;
+BigTextTest.prototype.tolerance = 6;
 
 // If the lines of text are blocks, testing their width will tell us nothing.
 BigTextTest.prototype.init = function()
@@ -76,7 +76,9 @@ BigTextTest.prototype.linesTest = function(selector, expectedWidth, options)
 
         assertTrue('Line ' + j + ' class added.', $t.is('.bigtext-line' + j));
         if($t.hasClass(BigText.EXEMPT_CLASS)) {
-            assertTrue('Line ' + j + ' Font size must be unchanged', fontSize == BigText.STARTING_PX_FONT_SIZE);
+            // must be added to document to get font-size
+            var defaultDocumentFontSize = parseInt($('<div/>').appendTo(document.body).css('font-size'), 10);
+            assertEquals('Line ' + j + ' Font size must be unchanged', defaultDocumentFontSize, fontSize);
         } else {
             assertTrue('Line ' + j + ' Font size must be larger than the starting pixel size', fontSize > BigText.STARTING_PX_FONT_SIZE);
             assertTrue('Line ' + j + ' width should be about ' + expectedWidth + 'px (' + width + ')', minWidth < width && width < maxWidth);
@@ -161,14 +163,30 @@ BigTextTest.prototype.testUnbrokenSingleWord = function()
 
 BigTextTest.prototype.testTwoLinesButOneExempt = function()
 {
-    $(document.body).append('<div id="test" style="width:400px"><div>This is</div><div class="bigtext-exempt">a longer second line</div></div>');
+    $(document.body).append('<div id="test" style="width:400px"><div class="bigtext-exempt">a longer second line</div></div>');
 
     this.linesTest('#test', 400);
+};
+
+BigTextTest.prototype.testExemptLineWithChild = function()
+{
+    $(document.body).append('<div id="test" style="width:400px"><div>This is</div><div class="bigtext-exempt">a longer <span>second</span> line</div></div>');
+
+    var defaultDocumentFontSize = $('<div/>').appendTo(document.body).css('font-size'),
+        childFontSize = $('span').css('font-size');
+    assertEquals('Exempt line\'s child font size must be unchanged', defaultDocumentFontSize, childFontSize);
 };
 
 BigTextTest.prototype.testIdCssSelectorStyle = function()
 {
     $(document.body).append('<style>#test { width: 600px; font-weight: bold; }</style><div id="test"><div>This is a single line.</div></div>');
+
+    this.linesTest('#test', 600);
+};
+
+BigTextTest.prototype.testMaxWidth = function()
+{
+    $(document.body).append('<div id="test" style="max-width:600px"><div>This is a single line.</div></div>');
 
     this.linesTest('#test', 600);
 };
