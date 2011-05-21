@@ -9,16 +9,12 @@
             STYLE_ID: 'bigtext-id',
             LINE_CLASS_PREFIX: 'bigtext-line',
             EXEMPT_CLASS: 'bigtext-exempt',
-            INIT_KEY: 'bigtext-initialized',
-            RATIO_KEY: 'bigtext-ratio',
-            WORDSPACING_KEY: 'bigtext-wordspacing',
             DEFAULT_CHILD_SELECTOR: '> div',
             childSelectors: {
                 div: '> div',
                 ol: '> li',
                 ul: '> li'
             },
-            DATA_KEY: 'bigtextOptions',
             init: function()
             {
                 if(!$('#'+BigText.GLOBAL_STYLE_ID).length) {
@@ -39,28 +35,33 @@
                     $(window).unbind(eventName).bind(eventName, resizeFunction);
                 }
             },
-            getStyleId: function(elementId)
+            getStyleId: function(id)
             {
-                return BigText.STYLE_ID + '-' + elementId;
+                return BigText.STYLE_ID + '-' + id;
             },
             generateStyleTag: function(id, css)
             {
                 return $('<style>' + css.join('\n') + '</style>').attr('id', id);
             },
-            generateCss: function(elementId, linesFontSizes, lineWordSpacings)
+            clearCss: function(id)
             {
-                var css = [],
-                    styleId = BigText.getStyleId(elementId);
-    
+                var styleId = BigText.getStyleId(id);
+                $('#' + styleId).remove();
+            },
+            generateCss: function(id, linesFontSizes, lineWordSpacings)
+            {
+                var css = [];
+
+                BigText.clearCss(id);
+
                 for(var j=0, k=linesFontSizes.length; j<k; j++) {
-                    css.push('#' + elementId + ' .' + BigText.LINE_CLASS_PREFIX + j + ' {' + 
+                    css.push('#' + id + ' .' + BigText.LINE_CLASS_PREFIX + j + ' {' + 
                         (linesFontSizes[j] ? ' font-size: ' + linesFontSizes[j] + 'px;' : '') + 
                         (lineWordSpacings[j] ? ' word-spacing: ' + lineWordSpacings[j] + 'px;' : '') +
                         '}');
                 }
-    
-                $('#' + styleId).remove();
-                return BigText.generateStyleTag(styleId, css);
+
+                return BigText.generateStyleTag(BigText.getStyleId(id), css);
             }
         };
 
@@ -192,16 +193,6 @@
         };
     }
 
-    function setId()
-    {
-        var id = $(this).attr('id');
-        if(!id) {
-            id = 'bigtext-id' + (counter++);
-            $t.attr('id', id);
-        }
-        return id;
-    }
-
     $.fn.bigtext = function(options)
     {
         BigText.init();
@@ -219,54 +210,31 @@
                             BigText.childSelectors[this.tagName.toLowerCase()] ||
                             BigText.DEFAULT_CHILD_SELECTOR,
                 maxWidth = $t.width(),
-                id = setId.call(this),
-                firstRun = !$t.data(BigText.INIT_KEY);
+                id = $t.attr('id');
 
-            if(firstRun) {
-                $t.data(BigText.INIT_KEY, true);
-
-                if(options.resize) {
-                    BigText.bindResize('resize.bigtext-event-' + id, function()
-                    {
-                        $('#' + id).bigtext(options);
-                    });
-                }
+            if(!id) {
+                id = 'bigtext-id' + (counter++);
+                $t.attr('id', id);
             }
 
-            var styleId = BigText.getStyleId(id);
-            $('#' + styleId).remove();
-
-            var calculations;
-
-            if(firstRun) {
-                calculations = calculateSizes($t, childSelector, maxWidth, options.maxfontsize);
-                $t.data(BigText.WORDSPACING_KEY, calculations.wordSpacings)
-                    .data(BigText.RATIO_KEY, calculations.ratios)
-                    .find(childSelector).each(function(lineNumber)
-                    {
-                        $(this).each(function()
-                            {
-                                // remove existing line classes.
-                                this.className = this.className.replace(new RegExp('\\s*' + BigText.LINE_CLASS_PREFIX + '\\d+'), '');
-                            })
-                            .addClass(BigText.LINE_CLASS_PREFIX + lineNumber);
-                    });
-            } else {
-                var fontSizes = [],
-                    ratios = $t.data(BigText.RATIO_KEY);
-
-                for(var j=0, k=ratios.length; j<k; j++) {
-                    fontSizes.push(ratios[j] ? maxWidth / ratios[j] : null);
-                }
-
-                calculations = {
-                    fontSizes: fontSizes,
-                    wordSpacings: $t.data(BigText.WORDSPACING_KEY),
-                    ratios: ratios
-                };
+            if(options.resize) {
+                BigText.bindResize('resize.bigtext-event-' + id, function()
+                {
+                    $('#' + id).bigtext(options);
+                });
             }
 
-            $headCache.append(BigText.generateCss(id, calculations.fontSizes, calculations.wordSpacings));
+            BigText.clearCss(id);
+
+            $t.find(childSelector).addClass(function(lineNumber, className)
+            {
+                // remove existing line classes.
+                return [className.replace(new RegExp('\\s*' + BigText.LINE_CLASS_PREFIX + '\\d+'), ''),
+                        BigText.LINE_CLASS_PREFIX + lineNumber].join(' ');
+            });
+
+            var sizes = calculateSizes($t, childSelector, maxWidth, options.maxfontsize);
+            $headCache.append(BigText.generateCss(id, sizes.fontSizes, sizes.wordSpacings));
         });
     };
 
