@@ -166,8 +166,8 @@
             ratios = [];
 
         $c.find(childSelector).css({
-            float: 'left',
-            clear: 'left'
+            'float': 'left',
+            'clear': 'left'
         }).each(function(lineNumber) {
             var $line = $(this),
                 intervals = [4,1,.4,.1],
