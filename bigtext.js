@@ -2,6 +2,8 @@
 {
     var counter = 0,
         $headCache = $('head'),
+        oldBigText = window.BigText,
+        oldjQueryMethod = $.fn.bigtext,
         BigText = {
             STARTING_PX_FONT_SIZE: 32,
             DEFAULT_MAX_FONT_SIZE_PX: 528,
@@ -14,6 +16,14 @@
                 div: '> div',
                 ol: '> li',
                 ul: '> li'
+            },
+            noConflict: function(restore)
+            {
+                if(restore) {
+                    $.fn.bigtext = oldjQueryMethod;
+                    window.BigText = oldBigText;
+                }
+                return BigText;
             },
             init: function()
             {
@@ -30,7 +40,7 @@
                 } else {
                     if($.fn.smartresize) {
                         // https://github.com/lrbabe/jquery-smartresize/
-                        eventName = 'smartresize.' + eventNamespace;
+                        eventName = 'smartresize.' + eventName;
                     }
                     $(window).unbind(eventName).bind(eventName, resizeFunction);
                 }
@@ -62,6 +72,50 @@
                 }
 
                 return BigText.generateStyleTag(BigText.getStyleId(id), css);
+            },
+            jQueryMethod: function(options)
+            {
+                BigText.init();
+        
+                options = $.extend({
+                            maxfontsize: BigText.DEFAULT_MAX_FONT_SIZE_PX,
+                            childSelector: '',
+                            resize: true
+                        }, options || {});
+            
+                return this.each(function()
+                {
+                    var $t = $(this).addClass('bigtext'),
+                        childSelector = options.childSelector ||
+                                    BigText.childSelectors[this.tagName.toLowerCase()] ||
+                                    BigText.DEFAULT_CHILD_SELECTOR,
+                        maxWidth = $t.width(),
+                        id = $t.attr('id');
+        
+                    if(!id) {
+                        id = 'bigtext-id' + (counter++);
+                        $t.attr('id', id);
+                    }
+        
+                    if(options.resize) {
+                        BigText.bindResize('resize.bigtext-event-' + id, function()
+                        {
+                            BigText.jQueryMethod.call($('#' + id), options);
+                        });
+                    }
+        
+                    BigText.clearCss(id);
+        
+                    $t.find(childSelector).addClass(function(lineNumber, className)
+                    {
+                        // remove existing line classes.
+                        return [className.replace(new RegExp('\\s*' + BigText.LINE_CLASS_PREFIX + '\\d+'), ''),
+                                BigText.LINE_CLASS_PREFIX + lineNumber].join(' ');
+                    });
+        
+                    var sizes = calculateSizes($t, childSelector, maxWidth, options.maxfontsize);
+                    $headCache.append(BigText.generateCss(id, sizes.fontSizes, sizes.wordSpacings));
+                });
             }
         };
 
@@ -193,50 +247,7 @@
         };
     }
 
-    $.fn.bigtext = function(options)
-    {
-        BigText.init();
-
-        options = $.extend({
-                    maxfontsize: BigText.DEFAULT_MAX_FONT_SIZE_PX,
-                    childSelector: '',
-                    resize: true
-                }, options || {});
-    
-        return this.each(function()
-        {
-            var $t = $(this).addClass('bigtext'),
-                childSelector = options.childSelector ||
-                            BigText.childSelectors[this.tagName.toLowerCase()] ||
-                            BigText.DEFAULT_CHILD_SELECTOR,
-                maxWidth = $t.width(),
-                id = $t.attr('id');
-
-            if(!id) {
-                id = 'bigtext-id' + (counter++);
-                $t.attr('id', id);
-            }
-
-            if(options.resize) {
-                BigText.bindResize('resize.bigtext-event-' + id, function()
-                {
-                    $('#' + id).bigtext(options);
-                });
-            }
-
-            BigText.clearCss(id);
-
-            $t.find(childSelector).addClass(function(lineNumber, className)
-            {
-                // remove existing line classes.
-                return [className.replace(new RegExp('\\s*' + BigText.LINE_CLASS_PREFIX + '\\d+'), ''),
-                        BigText.LINE_CLASS_PREFIX + lineNumber].join(' ');
-            });
-
-            var sizes = calculateSizes($t, childSelector, maxWidth, options.maxfontsize);
-            $headCache.append(BigText.generateCss(id, sizes.fontSizes, sizes.wordSpacings));
-        });
-    };
-
+    $.fn.bigtext = BigText.jQueryMethod;
     window.BigText = BigText;
+
 })(this, jQuery);
