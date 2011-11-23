@@ -20,7 +20,10 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js"></script>
         <script src="../bigtext.js"></script>
         <script>
-        $('#test').bigtext();
+        var bt = BigText.noConflict(true);
+        $.fn.bt = bt.jQueryMethod;
+
+        $('#test').bt();
         </script>
     </body>
 </html>

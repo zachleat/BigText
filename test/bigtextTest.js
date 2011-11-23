@@ -163,7 +163,7 @@ BigTextTest.prototype.testUnbrokenSingleWord = function()
 
 BigTextTest.prototype.testTwoLinesButOneExempt = function()
 {
-    $(document.body).append('<div id="test" style="width:400px"><div class="bigtext-exempt">a longer second line</div></div>');
+    $(document.body).append('<div id="test" style="width:400px"><div>This is</div><div class="bigtext-exempt">a longer second line</div></div>');
 
     this.linesTest('#test', 400);
 };
@@ -189,4 +189,19 @@ BigTextTest.prototype.testMaxWidth = function()
     $(document.body).append('<div id="test" style="max-width:600px"><div>This is a single line.</div></div>');
 
     this.linesTest('#test', 600);
+};
+
+BigTextTest.prototype.testNoConflict = function()
+{
+    $(document.body).append('<div id="test" style="width:600px"><div>This is a single line.</div></div>');
+
+    var BT = BigText.noConflict();
+    $.fn.bt = BT.jQueryMethod;
+
+    $('#test').bt();
+
+    var defaultDocumentFontSize = $('<div/>').appendTo(document.body).css('font-size'),
+        childFontSize = $('#test > div').css('font-size');
+
+    assertNotEquals('Font size must not equal the default.', defaultDocumentFontSize, childFontSize);
 };
