@@ -67,6 +67,8 @@ Examples
 
 ### Using with Custom Font-Face
 
+**Warning**: a known issue exists with the [Google/TypeKit font loader in WebKit](https://github.com/typekit/webfontloader/issues/26).
+
     <div id="bigtext">
         <div>BIGTEXT</div>
         <div>Makes Text Big</div>
@@ -96,6 +98,10 @@ Examples
         maxfontsize: 60 // default is 48 (in ems)
     });
     </script>
+
+### Is your text static and unchanging?
+
+See [Paravel's FitText plugin](http://fittextjs.com/). Curious how the two plugins compare? I've written a full [comparison between FitText and BigText](http://www.zachleat.com/web/fittext-and-bigtext/).
 
 Extra Features
 ----------------------------
