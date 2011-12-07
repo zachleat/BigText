@@ -5,7 +5,7 @@
         oldBigText = window.BigText,
         oldjQueryMethod = $.fn.bigtext,
         BigText = {
-            STARTING_PX_FONT_SIZE: 32,
+            DEFAULT_MIN_FONT_SIZE_PX: null,
             DEFAULT_MAX_FONT_SIZE_PX: 528,
             GLOBAL_STYLE_ID: 'bigtext-style',
             STYLE_ID: 'bigtext-id',
@@ -58,7 +58,7 @@
                 var styleId = BigText.getStyleId(id);
                 $('#' + styleId).remove();
             },
-            generateCss: function(id, linesFontSizes, lineWordSpacings)
+            generateCss: function(id, linesFontSizes, lineWordSpacings, minFontSizes)
             {
                 var css = [];
 
@@ -66,6 +66,7 @@
 
                 for(var j=0, k=linesFontSizes.length; j<k; j++) {
                     css.push('#' + id + ' .' + BigText.LINE_CLASS_PREFIX + j + ' {' + 
+                        (minFontSizes[j] ? ' white-space: normal;' : '') + 
                         (linesFontSizes[j] ? ' font-size: ' + linesFontSizes[j] + 'px;' : '') + 
                         (lineWordSpacings[j] ? ' word-spacing: ' + lineWordSpacings[j] + 'px;' : '') +
                         '}');
@@ -78,6 +79,7 @@
                 BigText.init();
         
                 options = $.extend({
+                            minfontsize: BigText.DEFAULT_MIN_FONT_SIZE_PX,
                             maxfontsize: BigText.DEFAULT_MAX_FONT_SIZE_PX,
                             childSelector: '',
                             resize: true
@@ -113,8 +115,8 @@
                                 BigText.LINE_CLASS_PREFIX + lineNumber].join(' ');
                     });
         
-                    var sizes = calculateSizes($t, childSelector, maxWidth, options.maxfontsize);
-                    $headCache.append(BigText.generateCss(id, sizes.fontSizes, sizes.wordSpacings));
+                    var sizes = calculateSizes($t, childSelector, maxWidth, options.maxfontsize, options.minfontsize);
+                    $headCache.append(BigText.generateCss(id, sizes.fontSizes, sizes.wordSpacings, sizes.minFontSizes));
                 });
             }
         };
@@ -145,7 +147,7 @@
         return false;
     }
 
-    function calculateSizes($t, childSelector, maxWidth, maxFontSize)
+    function calculateSizes($t, childSelector, maxWidth, maxFontSize, minFontSize)
     {
         var $c = $t.clone(true)
                     .addClass('bigtext-cloned')
@@ -163,6 +165,7 @@
         // nor does it respect hundredths of a font-size em.
         var fontSizes = [],
             wordSpacings = [],
+            minFontSizes = [],
             ratios = [];
 
         $c.find(childSelector).css({
@@ -176,6 +179,7 @@
             if($line.hasClass(BigText.EXEMPT_CLASS)) {
                 fontSizes.push(null);
                 ratios.push(null);
+                minFontSizes.push(false);
                 return;
             }
 
@@ -209,8 +213,13 @@
 
             if(newFontSize > maxFontSize) {
                 fontSizes.push(maxFontSize);
+                minFontSizes.push(false);
+            } else if(!!minFontSize && newFontSize < minFontSize) {
+                fontSizes.push(minFontSize);
+                minFontSizes.push(true);
             } else {
                 fontSizes.push(newFontSize);
+                minFontSizes.push(false);
             }
         }).each(function(lineNumber) {
             var $line = $(this),
@@ -243,7 +252,8 @@
         return {
             fontSizes: fontSizes,
             wordSpacings: wordSpacings,
-            ratios: ratios
+            ratios: ratios,
+            minFontSizes: minFontSizes
         };
     }
 

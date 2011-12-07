@@ -95,7 +95,18 @@ Examples
     </div>
     <script>
     $('#bigtext').bigtext({
-        maxfontsize: 60 // default is 48 (in ems)
+        maxfontsize: 60 // default is 48 (in px)
+    });
+    </script>
+
+### Adding a default min font size
+
+    <div id="bigtext">
+        <div>This is a super long line that will probably be resized to epically small proportions. We need a minimum font size!</div>
+    </div>
+    <script>
+    $('#bigtext').bigtext({
+        minfontsize: 16 // default is null
     });
     </script>
 
