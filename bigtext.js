@@ -111,7 +111,7 @@
                     $t.find(childSelector).addClass(function(lineNumber, className)
                     {
                         // remove existing line classes.
-                        return [className.replace(new RegExp('\\s*' + BigText.LINE_CLASS_PREFIX + '\\d+'), ''),
+                        return [className.replace(new RegExp('(?:^|\\s+)' + BigText.LINE_CLASS_PREFIX + '\\d+'), ''),
                                 BigText.LINE_CLASS_PREFIX + lineNumber].join(' ');
                     });
         
