@@ -225,3 +225,12 @@ BigTextTest.prototype.testMinFontSize = function()
     assertEquals('Font size should equal the minimum.', '16px', $('#test > div').css('font-size'));
     assertEquals('When minimum is set, word wrap should re-enable.', 'normal', $('#test > div').css('white-space'));
 };
+
+BigTextTest.prototype.testChildClassReplace = function()
+{
+    $(document.body).append('<div id="test" style="width:600px"><div class="testbigtext-line1">This is a single line.</div></div>');
+
+    this.linesTest('#test', 600);
+    assertTrue('First line should still have testbigtext-line1 class', $('#test > div').hasClass('testbigtext-line1'));
+    assertFalse('First line should not have test class', $('#test > div').hasClass('test'));
+};
