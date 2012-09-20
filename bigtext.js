@@ -77,14 +77,14 @@
             jQueryMethod: function(options)
             {
                 BigText.init();
-        
+
                 options = $.extend({
                             minfontsize: BigText.DEFAULT_MIN_FONT_SIZE_PX,
                             maxfontsize: BigText.DEFAULT_MAX_FONT_SIZE_PX,
                             childSelector: '',
                             resize: true
                         }, options || {});
-            
+
                 return this.each(function()
                 {
                     var $t = $(this).addClass('bigtext'),
@@ -93,28 +93,28 @@
                                     BigText.DEFAULT_CHILD_SELECTOR,
                         maxWidth = $t.width(),
                         id = $t.attr('id');
-        
+
                     if(!id) {
                         id = 'bigtext-id' + (counter++);
                         $t.attr('id', id);
                     }
-        
+
                     if(options.resize) {
                         BigText.bindResize('resize.bigtext-event-' + id, function()
                         {
                             BigText.jQueryMethod.call($('#' + id), options);
                         });
                     }
-        
+
                     BigText.clearCss(id);
-        
+
                     $t.find(childSelector).addClass(function(lineNumber, className)
                     {
                         // remove existing line classes.
                         return [className.replace(new RegExp('\\b' + BigText.LINE_CLASS_PREFIX + '\\d+\\b'), ''),
                                 BigText.LINE_CLASS_PREFIX + lineNumber].join(' ');
                     });
-        
+
                     var sizes = calculateSizes($t, childSelector, maxWidth, options.maxfontsize, options.minfontsize);
                     $headCache.append(BigText.generateCss(id, sizes.fontSizes, sizes.wordSpacings, sizes.minFontSizes));
                 });
@@ -174,7 +174,7 @@
             'clear': 'left'
         }).each(function(lineNumber) {
             var $line = $(this),
-                intervals = [4,1,.4,.1],
+                intervals = [4, 1, 0.4, 0.1],
                 lineMax;
 
             if($line.hasClass(BigText.EXEMPT_CLASS)) {
@@ -190,6 +190,10 @@
                 lineWidth = $line.width(),
                 ratio = (lineWidth / currentFontSize).toFixed(6),
                 newFontSize = parseFloat(((maxWidth - autoGuessSubtraction) / ratio).toFixed(3));
+
+            while (newFontSize + intervals[0] > maxFontSize) {
+                newFontSize = newFontSize - 1;
+            }
 
             outer: for(var m=0, n=intervals.length; m<n; m++) {
                 inner: for(var j=1, k=4; j<=k; j++) {
