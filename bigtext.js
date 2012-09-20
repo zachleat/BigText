@@ -152,6 +152,7 @@
         var $c = $t.clone(true)
                     .addClass('bigtext-cloned')
                     .css({
+                        fontFamily: $t.css('font-family'),
                         'min-width': parseInt(maxWidth, 10),
                         width: 'auto',
                         position: 'absolute',
