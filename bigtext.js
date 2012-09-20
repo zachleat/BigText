@@ -65,9 +65,9 @@
                 BigText.clearCss(id);
 
                 for(var j=0, k=linesFontSizes.length; j<k; j++) {
-                    css.push('#' + id + ' .' + BigText.LINE_CLASS_PREFIX + j + ' {' + 
-                        (minFontSizes[j] ? ' white-space: normal;' : '') + 
-                        (linesFontSizes[j] ? ' font-size: ' + linesFontSizes[j] + 'px;' : '') + 
+                    css.push('#' + id + ' .' + BigText.LINE_CLASS_PREFIX + j + ' {' +
+                        (minFontSizes[j] ? ' white-space: normal;' : '') +
+                        (linesFontSizes[j] ? ' font-size: ' + linesFontSizes[j] + 'px;' : '') +
                         (lineWordSpacings[j] ? ' word-spacing: ' + lineWordSpacings[j] + 'px;' : '') +
                         '}');
                 }
@@ -134,7 +134,7 @@
             if(width == maxWidth) {
                 return {
                     match: 'exact',
-                    size: parseFloat((parseFloat(size) - .1).toFixed(3))
+                    size: parseFloat((parseFloat(size) - 0.1).toFixed(3))
                 };
             }
 
