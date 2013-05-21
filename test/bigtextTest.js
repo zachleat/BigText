@@ -4,10 +4,7 @@ BigTextTest.tolerance = 6;
 // If the lines of text are blocks, testing their width will tell us nothing.
 BigTextTest.init = function()
 {
-  return this.css({
-    float: 'left',
-    clear: 'left'
-  });
+  return this.css('float', 'left');
 };
 
 BigTextTest.linesTest = function(selector, expectedWidth, options)
@@ -29,7 +26,6 @@ BigTextTest.linesTest = function(selector, expectedWidth, options)
   });
 
   $test.bigtext(options);
-
 
   ok('Class added.', $test.is('.bigtext'));
 
@@ -242,4 +238,11 @@ test('testChildClassReplace', function()
   BigTextTest.linesTest('#test', 600);
   ok($('#test > div').hasClass('testbigtext-line1'), 'First line should still have testbigtext-line1 class');
   ok(!$('#test > div').hasClass('test'), 'First line should not have test class');
+});
+
+test('testTextTransform', function()
+{
+  $('#qunit-fixture').append('<div style="text-transform: uppercase"><div id="test" style="width:600px"><div class="testbigtext-line1">This is a single line.</div></div></div>');
+
+  BigTextTest.linesTest('#test', 600);
 });

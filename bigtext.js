@@ -169,6 +169,7 @@
           .addClass('bigtext-cloned')
           .css({
             fontFamily: $t.css('font-family'),
+            textTransform: $t.css('text-transform'),
             position: 'absolute',
             left: -9999,
             top: -9999
