@@ -1,5 +1,4 @@
-;(function(window, $)
-{
+;(function(window, $) {
   var counter = 0,
     $headCache = $('head'),
     oldBigText = window.BigText,
@@ -25,15 +24,27 @@
         }
         return BigText;
       },
-      init: function()
-      {
+      test: {
+        noFractionalFontSize: (function() {
+          if( !( 'getComputedStyle' in window ) || !( 'body' in document ) ) {
+            return;
+          }
+          var test = $('<div/>').css({
+              position: 'absolute',
+              'font-size': '14.1px'
+            }).appendTo(document.body).get(0),
+            fontSize = window.getComputedStyle( test, null ).getPropertyValue( 'font-size' ),
+            ret = fontSize === '14px';
+          return ret;
+        })()
+      },
+      init: function() {
         if(!$('#'+BigText.GLOBAL_STYLE_ID).length) {
           $headCache.append(BigText.generateStyleTag(BigText.GLOBAL_STYLE_ID, ['.bigtext * { white-space: nowrap; }',
                                           '.bigtext .' + BigText.EXEMPT_CLASS + ', .bigtext .' + BigText.EXEMPT_CLASS + ' * { white-space: normal; }']));
         }
       },
-      bindResize: function(eventName, resizeFunction)
-      {
+      bindResize: function(eventName, resizeFunction) {
         if($.throttle) {
           // https://github.com/cowboy/jquery-throttle-debounce
           $(window).unbind(eventName).bind(eventName, $.throttle(100, resizeFunction));
@@ -102,6 +113,7 @@
           if(options.resize) {
             BigText.bindResize('resize.bigtext-event-' + id, function()
             {
+              // TODO only call this if the width has changed.
               BigText.jQueryMethod.call($('#' + id), options);
             });
           }
@@ -121,14 +133,16 @@
       }
     };
 
-  function testLineDimensions($line, maxWidth, property, size, interval, units)
+  function testLineDimensions($line, maxWidth, property, size, interval, units, previousWidth)
   {
-    var width;
+    var width,
+      previousWidth = typeof previousWidth == 'number' ? previousWidth : 0;
     $line.css(property, size + units);
 
     width = $line.width();
 
     if(width >= maxWidth) {
+// console.log(width, 'previous:', previousWidth, property + ' at ' + interval, parseFloat(size) - interval, parseFloat(size), $line.get(0));
       $line.css(property, '');
 
       if(width == maxWidth) {
@@ -137,14 +151,16 @@
           size: parseFloat((parseFloat(size) - 0.1).toFixed(3))
         };
       }
+      var under = maxWidth - previousWidth,
+        over = width - maxWidth;
 
       return {
         match: 'estimate',
-        size: parseFloat((parseFloat(size) - interval).toFixed(3))
+        size: parseFloat((parseFloat(size) - (previousWidth && over < under ? 0 : interval)).toFixed(3))
       };
     }
 
-    return false;
+    return width;
   }
 
   function calculateSizes($t, childSelector, maxWidth, maxFontSize, minFontSize)
@@ -153,28 +169,24 @@
           .addClass('bigtext-cloned')
           .css({
             fontFamily: $t.css('font-family'),
-            'min-width': parseInt(maxWidth, 10),
-            width: 'auto',
             position: 'absolute',
             left: -9999,
             top: -9999
           }).appendTo(document.body);
 
     // font-size isn't the only thing we can modify, we can also mess with:
-    // word-spacing and letter-spacing.
-    // Note: webkit does not respect subpixel letter-spacing or word-spacing,
-    // nor does it respect hundredths of a font-size em.
+    // word-spacing and letter-spacing. WebKit does not respect subpixel
+    // letter-spacing, word-spacing, or font-size.
+    // TODO try -webkit-transform: scale() as a workaround.
     var fontSizes = [],
       wordSpacings = [],
       minFontSizes = [],
       ratios = [];
 
-    $c.find(childSelector).css({
-      'float': 'left',
-      'clear': 'left'
-    }).each(function(lineNumber) {
+    $c.find(childSelector).css('float', 'left').each(function(lineNumber) {
       var $line = $(this),
-        intervals = [4, 1, 0.4, 0.1],
+        // TODO replace 4 with a proportional size to the calculated font-size.
+        intervals = BigText.test.noFractionalFontSize ? [4, 1] : [4, 1, 0.4, 0.1],
         lineMax;
 
       if($line.hasClass(BigText.EXEMPT_CLASS)) {
@@ -198,8 +210,8 @@
             break outer;
           }
 
-          lineMax = testLineDimensions($line, maxWidth, 'font-size', newFontSize + j*intervals[m], intervals[m], 'px');
-          if(lineMax !== false) {
+          lineMax = testLineDimensions($line, maxWidth, 'font-size', newFontSize + j*intervals[m], intervals[m], 'px', lineMax);
+          if(typeof lineMax !== 'number') {
             newFontSize = lineMax.size;
 
             if(lineMax.match == 'exact') {
@@ -236,9 +248,9 @@
       // must re-use font-size, even though it was removed above.
       $line.css('font-size', fontSizes[lineNumber] + 'px');
 
-      for(var m=1, n=5; m<n; m+=interval) {
-        maxWordSpacing = testLineDimensions($line, maxWidth, 'word-spacing', m, interval, 'px');
-        if(maxWordSpacing !== false) {
+      for(var m=1, n=3; m<n; m+=interval) {
+        maxWordSpacing = testLineDimensions($line, maxWidth, 'word-spacing', m, interval, 'px', maxWordSpacing);
+        if(typeof maxWordSpacing !== 'number') {
           wordSpacing = maxWordSpacing.size;
           break;
         }
