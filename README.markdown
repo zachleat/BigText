@@ -1,6 +1,10 @@
 BigText Makes Text Big
 ============================
 
+* Read the [original blog post](http://www.zachleat.com/web/bigtext-makes-text-big/)
+* Play around on the [demo](http://www.zachleat.com/bigtext/)
+* Watch the [video](http://www.youtube.com/watch?v=OuqB6e6NPRM)
+
 Requirements
 ----------------------------
 1. jQuery
@@ -120,6 +124,12 @@ Extra Features
 
 BigText does not implement its own debounced resize event, to reduce duplicate code. However, it does search for existing implementations. For example, [Ben Alman's Throttle/Debounce plugin](https://github.com/cowboy/jquery-throttle-debounce) or [Louis-Remi Babe's SmartResize](https://github.com/lrbabe/jquery-smartresize/), in that order.  If no debounced plugin is found, BigText will bind to the native resize event.
 
+### Debug Mode
+
+BigText uses an off-canvas detached node to improve performance when sizing. Setting `DEBUG_MODE` to true will leave this detached node on the canvas for visual inspection for problem resolution.
+
+    BigText.DEBUG_MODE = true;
+
 Common Problems
 ----------------------------
 
@@ -143,3 +153,4 @@ Releases
 * `v1.0` Initial release
 * `v1.1` Added line exempt feature.
 * `v1.2` Responsive BigText resizes with media queries and resize events (optionally debounced).
+* `v1.3` Numerous bug fixes, improved accuracy, adds debug mode. 

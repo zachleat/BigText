@@ -1,3 +1,7 @@
+/*! BigText - v0.1.3 - 2013-08-24
+* https://github.com/zachleat/BigText
+* Copyright (c) 2013 @zachleat; Licensed MIT */
+
 ;(function(window, $) {
   var counter = 0,
     $headCache = $('head'),
