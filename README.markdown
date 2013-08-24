@@ -159,7 +159,8 @@ Releases
 * `v1.0` Initial release
 * `v1.1` Added line exempt feature.
 * `v1.2` Responsive BigText resizes with media queries and resize events (optionally debounced).
-* `v1.3` Numerous bug fixes, improved accuracy, adds debug mode. 
+* `v1.3`
+* `v1.4` on `2013-08-24` Numerous bug fixes, improved accuracy, adds debug mode. 
 
 Build Status
 ----------------------------
