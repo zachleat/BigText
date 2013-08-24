@@ -1,5 +1,10 @@
-var BigTextTest = {};
-if( $.browser.msie && $.browser.version <= 8 ) {
+var BigTextTest = {},
+  ua = navigator.userAgent;
+
+// Be a little bit more forgiving on IE8 and Travis-CI/Ubuntu + PhantomJS
+if( $.browser.msie && $.browser.version <= 8 ||
+  ua.indexOf( 'PhantomJS' ) > -1 && ua.indexOf( 'Linux' ) > -1 ) {
+
   BigTextTest.tolerance = 14;
 } else {
   BigTextTest.tolerance = 6;
@@ -197,9 +202,13 @@ test('testExemptLineWithChild', function()
 
 test('testIdCssSelectorStyle', function()
 {
-  $('#qunit-fixture').html('<style>#test { width: 600px; font-weight: bold; }</style><div id="test"><div>This is a single line.</div></div>');
+  var id = 'test-style-insert';
+  // Travic-CI / Ubuntu PhantomJS needed a font-family here (the default font wasn’t bolding correctly)
+  $(document.head || 'head').append( '<style id="' + id + '">#test { width: 600px; font-family: Georgia; font-weight: bold; }</style>' );
+  $('#qunit-fixture').html('<div id="test"><div>This is a single line.</div></div>');
 
   BigTextTest.linesTest('#test', 600);
+  $('#' + id).remove();
 });
 
 test('testMaxWidth', function()
