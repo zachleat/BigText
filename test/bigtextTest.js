@@ -257,3 +257,10 @@ test('testWordSpacing', function()
 
   BigTextTest.linesTest('#test', 600);
 });
+
+test('testLetterSpacing', function()
+{
+  $('#qunit-fixture').html('<div style="letter-spacing: 3px"><div id="test" style="width:600px"><div class="testbigtext-line1">This is a single line.</div></div></div>');
+
+  BigTextTest.linesTest('#test', 600);
+});
