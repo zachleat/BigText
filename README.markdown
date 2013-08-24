@@ -8,19 +8,34 @@ BigText Makes Text Big
 Requirements
 ----------------------------
 1. jQuery
-1. A block level parent element, with block level children.
+1. A block level parent element. BigText will force all children to be block level as well.
 
 Examples
 ----------------------------
 
-### Normal Usage
+### Simple Example
 
     <div id="bigtext">
-        <div>BIGTEXT</div>
-        <div>Makes Text Big</div>
+        <span>BIGTEXT</span>
+        <span>Makes Text Big</span>
     </div>
     <script>
     $('#bigtext').bigtext();
+    </script>
+
+### Better, Progressive Enhancement-Based Example
+
+Use `display: inline` children (like a `span`) so the text will flow correctly if BigText doesn’t run.
+
+    <div id="bigtext">
+        <span>BIGTEXT</span>
+        <span>Makes Text Big</span>
+    </div>
+    <script>
+    // Only BigText on “new-ish” browsers
+    if( 'querySelectorAll' in document ) {
+        $('#bigtext').bigtext();    
+    }
     </script>
 
 ### Using a List (ordered/unordered)
@@ -33,7 +48,7 @@ Examples
     $('#bigtext').bigtext();
     </script>
 
-### Using other block child elements
+### Using other types of children
 
     <div id="bigtext">
         <p>BIGTEXT</p>
@@ -69,13 +84,15 @@ Examples
     $('#bigtext').bigtext();
     </script>
 
+Works also with `letter-spacing`, `word-spacing`, and `text-transform`.
+
 ### Using with Custom Font-Face
 
 **Warning**: a known issue exists with the [Google/TypeKit font loader in WebKit](https://github.com/typekit/webfontloader/issues/26).
 
     <div id="bigtext">
-        <div>BIGTEXT</div>
-        <div>Makes Text Big</div>
+        <span>BIGTEXT</span>
+        <span>Makes Text Big</span>
     </div>
     <script src="//ajax.googleapis.com/ajax/libs/webfont/1/webfont.js"></script>
     <script>
@@ -95,7 +112,7 @@ Examples
 ### Change the default max font size
 
     <div id="bigtext">
-        <div>BIG</div><!-- the shorter the line, the larger the size required --> 
+        <span>BIG</span><!-- the shorter the line, the larger the size required --> 
     </div>
     <script>
     $('#bigtext').bigtext({
@@ -106,7 +123,7 @@ Examples
 ### Adding a default min font size
 
     <div id="bigtext">
-        <div>This is a super long line that will probably be resized to epically small proportions. We need a minimum font size!</div>
+        <span>This is a super long line that will probably be resized to epically small proportions. We need a minimum font size!</span>
     </div>
     <script>
     $('#bigtext').bigtext({
@@ -134,18 +151,7 @@ Common Problems
 ----------------------------
 
 ### Lines Wrapping Pre-BigText
-The starting font-size must be small enough to guarantee that each individual line is not wrapping pre-BigText.  Adjust the amount of text per line, or set the starting font size using the example below.
-
-#### Change the default min (starting) font size
-
-    <div id="bigtext">
-        <div>This is a really long line, that may be too long since it might wrap.</div>
-    </div>
-    <script>
-    // Global Configuration Option
-    BigText.STARTING_PX_FONT_SIZE = 8; // default is 11 (in px)
-    $('#bigtext').bigtext();
-    </script>
+The starting font-size must be small enough to guarantee that each individual line is not wrapping pre-BigText. If the line is too long, BigText will not size it correctly.
     
 Releases
 ----------------------------
