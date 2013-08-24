@@ -160,3 +160,8 @@ Releases
 * `v1.1` Added line exempt feature.
 * `v1.2` Responsive BigText resizes with media queries and resize events (optionally debounced).
 * `v1.3` Numerous bug fixes, improved accuracy, adds debug mode. 
+
+Build Status
+----------------------------
+
+[![Build Status](https://travis-ci.org/zachleat/BigText.png?branch=master)](https://travis-ci.org/zachleat/BigText)
