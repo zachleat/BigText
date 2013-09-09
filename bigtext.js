@@ -181,6 +181,7 @@
             textTransform: $t.css('text-transform'),
             wordSpacing: $t.css('word-spacing'),
             letterSpacing: $t.css('letter-spacing'),
+			fontWeight: $t.css('font-weight'),
             position: 'absolute',
             left: BigText.DEBUG_MODE ? 0 : -9999,
             top: BigText.DEBUG_MODE ? 0 : -9999
