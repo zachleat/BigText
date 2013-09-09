@@ -16,8 +16,8 @@ Examples
 ### Simple Example
 
     <div id="bigtext">
-        <span>BIGTEXT</span>
-        <span>Makes Text Big</span>
+        <div>BIGTEXT</div>
+        <div>Makes Text Big</div>
     </div>
     <script>
     $('#bigtext').bigtext();
@@ -34,7 +34,9 @@ Use `display: inline` children (like a `span`) so the text will flow correctly i
     <script>
     // Only BigText on “new-ish” browsers
     if( 'querySelectorAll' in document ) {
-        $('#bigtext').bigtext();    
+        $('#bigtext').bigtext({
+			childSelector: '> span'
+		});    
     }
     </script>
 
