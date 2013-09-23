@@ -140,8 +140,8 @@
 
   function testLineDimensions($line, maxWidth, property, size, interval, units, previousWidth)
   {
-    var width,
-      previousWidth = typeof previousWidth == 'number' ? previousWidth : 0;
+    var width;
+    previousWidth = typeof previousWidth == 'number' ? previousWidth : 0;
     $line.css(property, size + units);
 
     width = $line.width();
