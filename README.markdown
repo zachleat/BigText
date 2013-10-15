@@ -48,7 +48,9 @@ Use `display: inline` children (like a `span`) so the text will flow correctly i
     $('#bigtext').bigtext();
     </script>
 
-### Using other types of children
+### Restrict to a subset of children
+
+#### Opt-in children with JS
 
     <div id="bigtext">
         <p>BIGTEXT</p>
@@ -60,7 +62,7 @@ Use `display: inline` children (like a `span`) so the text will flow correctly i
     });
     </script>
 
-### Exempting/Excluding Lines
+#### Opt-out lines using markup
 
     <ol id="bigtext">
         <li>BIGTEXT</li>

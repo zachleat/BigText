@@ -7,7 +7,7 @@ if( $.browser.msie && $.browser.version <= 8 ||
 
   BigTextTest.tolerance = 14;
 } else {
-  BigTextTest.tolerance = 6;
+  BigTextTest.tolerance = 10;
 }
 
 // If the lines of text are blocks, testing their width will tell us nothing.
@@ -23,7 +23,7 @@ BigTextTest.linesTest = function(selector, expectedWidth, options)
     maxWidth = expectedWidth + tolerance,
     options = options || {},
     $test = $(selector),
-    $lines = $test.find(options.childSelector || '> *'),
+    $lines = options.childSelector ? $test.find( options.childSelector ) : $test.children(),
     startingFontSize = parseInt($lines.eq(0).css('font-size'), 10);
 
   BigTextTest.init.call($lines);
@@ -270,6 +270,29 @@ test('testWordSpacing', function()
 test('testLetterSpacing', function()
 {
   $('#qunit-fixture').html('<div style="letter-spacing: 3px"><div id="test" style="width:600px"><div class="testbigtext-line1">This is a single line.</div></div></div>');
+
+  BigTextTest.linesTest('#test', 600);
+});
+
+test('testSizes', function()
+{
+  for( var j = 200, k = 800; j<k; j += 50 ) {
+    $('#qunit-fixture').html('<div id="test" style="width:' + j + 'px"><div>This is a single line.</div></div>');
+
+    BigTextTest.linesTest('#test', j);
+  }
+});
+
+test('testSpanChildren', function()
+{
+  $('#qunit-fixture').html('<div id="test" style="width:600px"><span>This is</span><span>a longer second line</span></div>');
+
+  BigTextTest.linesTest('#test', 600);
+});
+
+test('testMixtureChildren', function()
+{
+  $('#qunit-fixture').html('<div id="test" style="width:600px"><div>This is</div><span>a longer second line</span></div>');
 
   BigTextTest.linesTest('#test', 600);
 });

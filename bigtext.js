@@ -1,4 +1,4 @@
-/*! BigText - v0.1.4 - 2013-08-24
+/*! BigText - v0.1.5 - 2013-08-24
 * https://github.com/zachleat/BigText
 * Copyright (c) 2013 @zachleat; Licensed MIT */
 
@@ -15,12 +15,6 @@
       STYLE_ID: 'bigtext-id',
       LINE_CLASS_PREFIX: 'bigtext-line',
       EXEMPT_CLASS: 'bigtext-exempt',
-      DEFAULT_CHILD_SELECTOR: '> div',
-      childSelectors: {
-        div: '> div',
-        ol: '> li',
-        ul: '> li'
-      },
       noConflict: function(restore)
       {
         if(restore) {
@@ -97,18 +91,16 @@
         options = $.extend({
               minfontsize: BigText.DEFAULT_MIN_FONT_SIZE_PX,
               maxfontsize: BigText.DEFAULT_MAX_FONT_SIZE_PX,
-              childSelector: '',
+              childSelector: '', 
               resize: true
             }, options || {});
       
         return this.each(function()
         {
           var $t = $(this).addClass('bigtext'),
-            childSelector = options.childSelector ||
-                  BigText.childSelectors[this.tagName.toLowerCase()] ||
-                  BigText.DEFAULT_CHILD_SELECTOR,
             maxWidth = $t.width(),
-            id = $t.attr('id');
+            id = $t.attr('id'),
+            $children = options.childSelector ? $t.find( options.childSelector ) : $t.children();
 
           if(!id) {
             id = 'bigtext-id' + (counter++);
@@ -125,14 +117,14 @@
     
           BigText.clearCss(id);
     
-          $t.find(childSelector).addClass(function(lineNumber, className)
+          $children.addClass(function(lineNumber, className)
           {
             // remove existing line classes.
             return [className.replace(new RegExp('\\b' + BigText.LINE_CLASS_PREFIX + '\\d+\\b'), ''),
                 BigText.LINE_CLASS_PREFIX + lineNumber].join(' ');
           });
     
-          var sizes = calculateSizes($t, childSelector, maxWidth, options.maxfontsize, options.minfontsize);
+          var sizes = calculateSizes($t, $children, maxWidth, options.maxfontsize, options.minfontsize);
           $headCache.append(BigText.generateCss(id, sizes.fontSizes, sizes.wordSpacings, sizes.minFontSizes));
         });
       }
@@ -172,7 +164,7 @@
     return width;
   }
 
-  function calculateSizes($t, childSelector, maxWidth, maxFontSize, minFontSize)
+  function calculateSizes($t, $children, maxWidth, maxFontSize, minFontSize)
   {
     var $c = $t.clone(true)
           .addClass('bigtext-cloned')
@@ -195,7 +187,7 @@
       minFontSizes = [],
       ratios = [];
 
-    $c.find(childSelector).css('float', 'left').each(function(lineNumber) {
+    $children.css('float', 'left').each(function(lineNumber) {
       var $line = $(this),
         // TODO replace 8, 4 with a proportional size to the calculated font-size.
         intervals = BigText.test.noFractionalFontSize ? [8, 4, 1] : [8, 4, 1, 0.1],
