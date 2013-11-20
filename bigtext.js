@@ -25,7 +25,7 @@
       },
       test: {
         noFractionalFontSize: (function() {
-          if( !( 'getComputedStyle' in window ) || !( 'body' in document ) ) {
+          if( !( 'getComputedStyle' in window ) || !document.body ) {
             return true;
           }
           var test = $('<div/>').css({
@@ -173,6 +173,7 @@
             textTransform: $t.css('text-transform'),
             wordSpacing: $t.css('word-spacing'),
             letterSpacing: $t.css('letter-spacing'),
+			fontWeight: $t.css('font-weight'),
             position: 'absolute',
             left: BigText.DEBUG_MODE ? 0 : -9999,
             top: BigText.DEBUG_MODE ? 0 : -9999
