@@ -129,6 +129,7 @@
           var sizes = calculateSizes($t, $children, maxWidth, options.maxfontsize, options.minfontsize);
           $headCache.append(BigText.generateCss(id, sizes.fontSizes, sizes.wordSpacings, sizes.minFontSizes));
         });
+        return this.trigger('bigtext:complete')
       }
     };
 
