@@ -97,7 +97,7 @@
               resize: true
             }, options || {});
       
-        return this.each(function()
+        this.each(function()
         {
           var $t = $(this).addClass('bigtext'),
             maxWidth = $t.width(),
