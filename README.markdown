@@ -158,12 +158,12 @@ The starting font-size must be small enough to guarantee that each individual li
 Releases
 ----------------------------
 
-* `v1.0` Initial release
-* `v1.1` Added line exempt feature.
-* `v1.2` Responsive BigText resizes with media queries and resize events (optionally debounced).
-* `v1.3`
-* `v1.4` on `2013-08-24` Numerous bug fixes, improved accuracy, adds debug mode. 
-* `v1.5` on `2013-10-14` BigText uses all children by default (#40)
+* `v0.1.0` Initial release
+* `v0.1.1` Added line exempt feature.
+* `v0.1.2` Responsive BigText resizes with media queries and resize events (optionally debounced).
+* `v0.1.3`
+* `v0.1.4` on `2013-08-24` Numerous bug fixes, improved accuracy, adds debug mode. 
+* `v0.1.5` on `2013-10-14` BigText uses all children by default (#40)
 
 Build Status
 ----------------------------
