@@ -51,6 +51,8 @@
           if($.fn.smartresize) {
             // https://github.com/lrbabe/jquery-smartresize/
             eventName = 'smartresize.' + eventName;
+          } else if(_.debounce) {
+	          resizeFunction = _.debounce(resizeFunction, 200)
           }
           $(window).unbind(eventName).bind(eventName, resizeFunction);
         }
@@ -95,7 +97,7 @@
               resize: true
             }, options || {});
       
-        return this.each(function()
+        this.each(function()
         {
           var $t = $(this).addClass('bigtext'),
             maxWidth = $t.width(),
@@ -127,6 +129,7 @@
           var sizes = calculateSizes($t, $children, maxWidth, options.maxfontsize, options.minfontsize);
           $headCache.append(BigText.generateCss(id, sizes.fontSizes, sizes.wordSpacings, sizes.minFontSizes));
         });
+        return this.trigger('bigtext:complete')
       }
     };
 
