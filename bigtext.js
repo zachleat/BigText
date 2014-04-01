@@ -32,6 +32,9 @@
               position: 'absolute',
               'font-size': '14.1px'
             }).appendTo(document.body).get(0),
+            computedStyle;
+            
+          if(typeof window.getComputedStyle == 'object')
             computedStyle = window.getComputedStyle( test, null );
 
           return computedStyle ? computedStyle.getPropertyValue( 'font-size' ) === '14px' : true;
