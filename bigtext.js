@@ -44,6 +44,7 @@
         }
       },
       bindResize: function(eventName, resizeFunction) {
+        var _ = "";
         if($.throttle) {
           // https://github.com/cowboy/jquery-throttle-debounce
           $(window).unbind(eventName).bind(eventName, $.throttle(100, resizeFunction));
@@ -87,14 +88,14 @@
       jQueryMethod: function(options)
       {
         BigText.init();
-    
+
         options = $.extend({
               minfontsize: BigText.DEFAULT_MIN_FONT_SIZE_PX,
               maxfontsize: BigText.DEFAULT_MAX_FONT_SIZE_PX,
-              childSelector: '', 
+              childSelector: '',
               resize: true
             }, options || {});
-      
+
         this.each(function()
         {
           var $t = $(this).addClass('bigtext'),
@@ -106,7 +107,7 @@
             id = 'bigtext-id' + (counter++);
             $t.attr('id', id);
           }
-    
+
           if(options.resize) {
             BigText.bindResize('resize.bigtext-event-' + id, function()
             {
@@ -114,16 +115,16 @@
               BigText.jQueryMethod.call($('#' + id), options);
             });
           }
-    
+
           BigText.clearCss(id);
-    
+
           $children.addClass(function(lineNumber, className)
           {
             // remove existing line classes.
             return [className.replace(new RegExp('\\b' + BigText.LINE_CLASS_PREFIX + '\\d+\\b'), ''),
                 BigText.LINE_CLASS_PREFIX + lineNumber].join(' ');
           });
-    
+
           var sizes = calculateSizes($t, $children, maxWidth, options.maxfontsize, options.minfontsize);
           $headCache.append(BigText.generateCss(id, sizes.fontSizes, sizes.wordSpacings, sizes.minFontSizes));
         });
