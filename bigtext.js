@@ -51,8 +51,6 @@
           if($.fn.smartresize) {
             // https://github.com/lrbabe/jquery-smartresize/
             eventName = 'smartresize.' + eventName;
-          } else if(_.debounce) {
-            resizeFunction = _.debounce(resizeFunction, 200);
           }
           $(window).unbind(eventName).bind(eventName, resizeFunction);
         }
