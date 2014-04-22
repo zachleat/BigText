@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>BigText QUnit Tests</title>
-  <link rel="stylesheet" href="lib/qunit-1.12.0.css">
-  <style>
-  ol, ul {
-    margin: 0;
-    padding: 0;
-  }
-  </style>
+	<meta charset="utf-8">
+	<title>GRUNTLERPLATE Test Suite</title>
+	<!-- Load local jQuery, removing access to $ (use jQuery, not $). -->
+	<script src="../bower_components/jquery/dist/jquery.js"></script>
+	<script>jQuery.noConflict()</script>
+	<!-- Load local QUnit (grunt requires v1.0.0 or newer). -->
+	<link rel="stylesheet" href="../bower_components/qunit/qunit/qunit.css">
+	<script src="../bower_components/qunit/qunit/qunit.js"></script>
+	<!-- Load local lib and tests. -->
+	<script src="../dist/bigtext.js"></script>
+	<script src="../dist/test/tests.js"></script>
 </head>
 <body>
-  <div id="qunit"></div>
-  <div id="qunit-fixture"></div>
-  <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
-  <script src="lib/jquery-partial-migrate.js"></script>
-  <script src="lib/qunit-1.12.0.js"></script>
-  <script src="lib/underscore-1.5.2.js"></script>
-  <script src="../bigtext.js"></script>
-  <script src="bigtextTest.js"></script>
+	<h1 id="qunit-header">GRUNTLERPLATE Test Suite</h1>
+	<h2 id="qunit-banner"></h2>
+	<div id="qunit-testrunner-toolbar"></div>
+	<h2 id="qunit-userAgent"></h2>
+	<ol id="qunit-tests"></ol>
+	<div id="qunit-fixture"></div>
 </body>
 </html>

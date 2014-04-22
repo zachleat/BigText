@@ -1,20 +1,52 @@
 {
   "name": "bigtext",
   "title": "BigText",
-  "description": "Calculates the font-size and word-spacing needed to match a line of text to a specific width. (jQuery plugin)",
   "version": "0.1.5",
-  "homepage": "https://github.com/zachleat/BigText",
+  "description": "Calculates the font-size and word-spacing needed to match a line of text to a specific width. (jQuery plugin)",
+  "keywords": [
+    "grunt",
+    "typography"
+  ],
+  "homepage": "https://github.com/zachleat/bigtext",
+  "bugs": "https://github.com/zachleat/bigtext/issues",
   "author": {
-    "name": "zachleat",
+    "name": "Zach Leatherman",
     "email": "zachleatherman@gmail.com",
-    "url": "http://www.zachleat.com/"
+    "twitter": "zachleat",
+    "github": "zachleat",
+    "url": "http://zachleat.com"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/zachleat/BigText.git"
+    "url": "git://github.com/zachleat/bigtext.git"
   },
-  "bugs": {
-    "url": "https://github.com/zachleat/BigText/issues"
+  "scripts": {
+    "test": "grunt test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.4",
+    "grunt-contrib-jshint": "~0.10.0",
+    "glob": "~3.2.9",
+    "load-grunt-tasks": "~0.4.0",
+    "matchdep": "~0.3.0",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-qunit": "~0.4.0",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-gh-pages": "~0.9.1",
+    "grunt-contrib-concat": "~0.4.0",
+    "bytesize": "~0.2.0",
+    "grunt-bytesize": "~0.1.1",
+    "grunt-contrib-csslint": "~0.2.0",
+    "grunt-banner": "~0.2.2",
+    "grunt-replace": "~0.7.6",
+    "grunt-lintspaces": "~0.5.0",
+    "grunt-mkdir": "~0.1.1"
+  },
+  "peerDependencies": {},
+  "engines": {
+    "node": ">=0.8.0",
+    "npm": ">=1.2.10"
   },
   "licenses": [
     {
@@ -22,10 +54,12 @@
       "url": "https://github.com/zachleat/BigText/blob/master/LICENSE"
     }
   ],
-  "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-contrib-qunit": "~0.2.2"
-  },
-  "dependencies": {},
-  "keywords": []
+  "config": {
+    "grunt": "grunt",
+    "src": "src",
+    "dist": "dist",
+    "test": "test",
+    "demo": "demo",
+    "bower": "bower_components"
+  }
 }

@@ -1,0 +1,12 @@
+{
+	"name": "GRUNTLERPLATE",
+	"version": "0.0.0",
+	"main": ["dist/GRUNTLERPLATE.js"],
+	"ignore": [
+		"**/.*"
+	],
+	"dependencies": {
+		"jquery": ">=1.9.1 <2.0.0",
+		"qunit": ">=1.12.0"
+	}
+}
