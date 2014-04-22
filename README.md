@@ -1,6 +1,6 @@
 # BigText
 
-[![Build Status](https://travis-ci.org/zachleat/bigtext.png?branch=master)](https://travis-ci.org/zachleat/bigtext)
+[![Build Status](https://travis-ci.org/zachleat/BigText.png?branch=master)](https://travis-ci.org/zachleat/BigText)
 
 ## BigText Makes Text Big 
 
