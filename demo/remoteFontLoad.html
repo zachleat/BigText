@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <title>BigText on a List</title>
+        <style>
+            #test {
+                width: 500px;
+                font-family: 'LeagueGothicRegular';
+            }
+        
+        </style>
+    </head>
+    <body>
+        <div id="test">
+            <div>This is</div>
+            <div>a longer second line</div>
+            <div class="bigtext-exempt">and an <span>exempt</span> line.</div>
+        </div>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
+        <script src="../bigtext.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/webfont/1/webfont.js"></script>
+        <script>
+            WebFont.load({
+                custom: {
+                    families: ['LeagueGothicRegular'], // font-family name
+                    urls : ['css/league-gothic/stylesheet-delay.css.php'] // URL to css
+                },
+                active: function() {
+                    $('#test').bigtext();
+                }
+            });
+        </script>
+    </body>
+</html>
