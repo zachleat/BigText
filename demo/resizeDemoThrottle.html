@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>BigText on a List</title>
+        <style>
+            ol {
+                width: 100%;
+                /*max-width: 600px;*/
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+            }
+            /* media query equivalent of max-width: 600px; */
+            @media screen and (min-width: 600px) {
+                ol {
+                    width: 600px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <ol>
+            <li>First</li>
+            <li>Second</li>
+            <li>This is the Third</li>
+            <li>Fourth</li>
+        </ol>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js"></script>
+        <script src="js/jquery.ba-throttle-debounce.js"></script>
+        <script src="../bigtext.js"></script>
+        <script>
+        $('ol').bigtext();
+        </script>
+    </body>
+</html>

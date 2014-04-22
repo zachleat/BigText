@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <title>BigText Wizard</title>
+        <link type="text/css" href="css/jquery-ui-1.8rc3.custom.css" rel="stylesheet" />
+        <link type="text/css" href="css/flexbox.css" rel="stylesheet" />
+        <link type="text/css" href="bigtextWizard.css" rel="stylesheet" />
+    </head>
+    <body class="bigtextWizardWhite">
+        <div id="centered" class="hbox center">
+            <div class="vbox center">
+                <div id="container">
+                    <div id="bigtext" class="bigtext blurred"><div>EDIT ME</div></div>
+                </div>
+            </div>
+        </div>
+        <div id="toolbar">
+            <div id="tabs">
+                <ul>
+                    <li><a href="#tabs-width">Width: <span id="posterWidth">430</span>px</a></li>
+                    <li><a href="#tabs-css">CSS</a></li>
+                    <li><a href="#tabs-height">Line Height</a></li>
+                    <li><a href="#tabs-3d">3D</a></li>
+                </ul>
+                <div id="tabs-width"><div id="widthSlider"></div></div>
+                <div id="tabs-css"><select id="font" size="5">
+                        <option value="">(None, use Custom CSS)</option>
+                        <option value="Arimo">Arimo</option>
+                        <option value="Arvo">Arvo</option>
+                        <option value="IM Fell English">IM Fell English</option>
+                        <option value="LeagueGothicRegular" selected="selected">League Gothic</option>
+                        <option value="Droid Sans">Droid Sans</option>
+                        <option value="Molengo">Molengo</option>
+                        <option value="Puritan">Puritan</option>
+                        <option value="Yanone Kaffeesatz">Yanone Kaffeesatz</option>
+                    </select><textarea id="customStyle">.bigtext {
+    font-family: Helvetica, Arial;
+}
+.bigtext > div {
+    line-height: 0.95em;
+}</textarea>
+</div>
+                <div id="tabs-height">
+                    <div id="lineHeightSliders"></div>
+                </div>
+                <div id="tabs-3d">
+                    <form>
+                        <div class="no-3d-transforms-support">
+                            <div class="ui-state-error ui-corner-all info-box">
+                                <p>
+                                    <span class="ui-icon ui-icon-alert"></span>
+                                    <strong>Darn.</strong> Your browser does not support 3d transforms, and the 3d stuff
+                                    here won't work for you. If you want to check it out, try Safari or a dev build of Chrome.
+                                </p>
+                            </div>
+                        </div>
+                        <label for="3d-x-slider">X: <input type="checkbox" id="3d-x-slider" class="dimension-slider"/></label>
+                        <label for="3d-y-slider">Y: <input type="checkbox" id="3d-y-slider" class="dimension-slider"/></label>
+                        <label for="3d-z-slider">Z: <input type="checkbox" id="3d-z-slider" class="dimension-slider"/></label>
+                        <label for="3d-animate-slider">Animate: <input type="checkbox" id="3d-animate-slider"/></label>
+                        <h3>Angle: <span id="3d-angle-value">0 degrees</span></h3>
+                        <div id="3d-angle-slider"></div>
+                        <button type="reset" id="reset-3d">Reset</button>
+                        <button type="button" id="random-3d">Random 3D Settings</button>
+                        <div id="translate-buttons">
+                            <h3>Translate</h3>
+                            <div>
+                                <button type="button" id="translate-x-plus">+ X</button> <button type="button" id="translate-x-minus">- X</button>
+                            </div>
+                            <div>
+                                <button type="button" id="translate-y-plus">+ Y</button> <button type="button" id="translate-y-minus">- Y</button>
+                            </div>
+                            <div>
+                                <button type="button" id="translate-z-plus">+ Z</button> <button type="button" id="translate-z-minus">- Z</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div>
+                <button type="button" id="refresh">Refresh</button>
+                <button type="button" id="clear">Clear</button>
+                <p>Created by <a href="https://twitter.com/zachleat">@zachleat</a>.</p>
+                <p>Back to the <a href="http://www.zachleat.com/web/bigtext-makes-text-big/">blog post</a>.</p>
+            </div>
+        </div>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/webfont/1/webfont.js"></script>
+        <script src="js/modernizr-1.6.min.js"></script>
+        <script src="js/jquery.ba-throttle-debounce.min.js"></script>
+        <script src="../dist/bigtext.js"></script>
+        <script src="bigtextWizard.js"></script>
+    </body>
+</html>

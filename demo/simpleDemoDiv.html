@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <title>BigText on a List</title>
+        <style>
+            #test {
+                width: 100%;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="test">
+            <div>This is</div>
+            <div>a longer second line</div>
+            <div class="bigtext-exempt">and an <span>exempt</span> line.</div>
+        </div>
+        
+        <div id="test2" style="width:600px"><div>This is a single line.</div></div>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js"></script>
+        <script src="../bigtext.js"></script>
+        <script>
+        var bt = BigText.noConflict(true);
+        $.fn.bt = bt.jQueryMethod;
+
+        $('#test').bt();
+        $('#test2').bt();
+        </script>
+    </body>
+</html>

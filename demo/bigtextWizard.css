@@ -1,0 +1,129 @@
+body {
+    padding-right: 200px;
+    overflow: hidden;
+    background-repeat: no-repeat;
+}
+body.bigtextWizardWhite {
+    -webkit-transition: 1.4s;
+    background-color: #fff;
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ddd), to(#fff));
+    background-image: -moz-linear-gradient(#ddd, #fff);
+    color: #111;
+}
+body.bigtextWizardBlack {
+    -webkit-transition: 1.4s;
+    background-color: #000;
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#222), to(#000));
+    background-image: -moz-linear-gradient(#222, #000);
+    color: #eee;
+}
+html, body { height: 100%; }
+body, textarea, h1, h2, h3 { font-family: Helvetica, Arial; }
+.ui-slider { cursor: pointer; }
+.ui-tabs { background-color: transparent; }
+.ui-tabs .ui-tabs-panel { background-color: #fff; }
+.info-box { padding: 0 .7em; margin: 1em 0; }
+#hint.info-box { display: table; margin: 1em auto; }
+.info-box .ui-icon { float: left; margin-right: .4em; }
+
+#centered {
+    width: 100%;
+    height: 100%;
+}
+#container {
+    -webkit-perspective: 600;
+    height: 100%;
+}
+#bigtext {
+    -webkit-transform-style: preserve-3d;
+    text-shadow: 0 0 1px hsla(0, 0%, 30%, 0.4);
+}
+#bigtext.blurred {
+    color: #ddd;
+}
+#bigtext div {
+    white-space: nowrap;
+    cursor: none;
+}
+#bigtext > div:hover {
+    cursor: text;
+}
+#bigtext > div:focus {
+    outline: none;
+}
+#bigtext.animate3d {
+    -webkit-transition: 0.3s;
+}
+@-webkit-keyframes fadeOut {
+ from {
+   opacity: 1;
+ }
+ to {
+   opacity: 0;
+ }
+}
+#bigtext.fadeOut {
+ -webkit-animation-name: fadeOut;
+ -webkit-animation-duration: 0.2s;
+ -webkit-animation-iteration-count: 2;
+ -webkit-animation-direction: alternate;
+}
+#bigtext.fadeIn {
+    opacity: 1;
+}
+::selection {
+    background: #000;
+    color: #fff;
+}
+::-moz-selection {
+    background: #000;
+    color: #fff;
+}
+.bigtext {
+    margin: 0 auto;
+    width: 430px;
+    font-family: Helvetica, Arial;
+}
+.csstransforms3d .no-3d-transforms-support {
+    display: none;
+}
+#toolbar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 320px;
+    padding: 20px;
+    text-align: center;
+}
+textarea,
+select {
+    width: 100%;
+}
+#font {
+    height: 80px;
+}
+#customStyle {
+    height: 120px;
+    margin-top: 1em;
+    font-family: 'Courier New';
+}
+#code {
+    font-size: 11px;
+    width: 100%;
+    padding: 10px 0;
+}
+#lineHeightSliders {}
+#lineHeightSliders .ui-slider {
+    height: 80px;
+    display: inline-block;
+    margin: 0 10px;
+}
+#random-3d,
+#translate-buttons {
+    margin-top: 1em;
+}
+
+@media print {
+    #toolbar { display: none; }
+    body { padding-right: 0; }
+}

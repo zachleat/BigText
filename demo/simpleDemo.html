@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <title>BigText on a List</title>
+        <style>
+            ol {
+                width: 100%;
+                list-style-type: none;
+                padding: 0;
+                margin: 0;
+                -moz-box-sizing: border-box;
+                -webkit-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+            @media (min-width: 800px) {
+                ol {
+                    width: 600px;
+                }
+            }
+        </style>
+<!--[if IE 8]>
+        <style>
+            ol {
+                width: 600px;
+            }
+        </style>
+<![endif]-->
+    </head>
+    <body>
+        <ol>
+            <li><a href="/xmas">Merry Christmas</a></li>
+            <li><a href="/soulwax">Soulwax</a></li>
+            <li><a href="/grapevinegame">The Grapevine Game</a></li>
+            <li><a href="/ticktalk">Tick Talk</a></li>
+        </ol>
+
+        <ol>
+            <li>First</li>
+            <li>Second</li>
+            <li>This is the Third</li>
+            <li>Fourth</li>
+        </ol>
+
+        <ol id="minfontsize">
+            <li>This is a really long sentence that will result in a tiny font size. This is a really long sentence that will result in a tiny font size.</li>
+            <li>This is a shorter line.</li>
+        </ol>
+
+        <ol id="test" style="width:600px"><li>This is</li><li>a longer second line</li><li>An even longer third line.</li></ol>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js"></script>
+        <script src="../bigtext.js"></script>
+        <script>
+        $('ol').bigtext({
+            //minfontsize: 30
+        });
+        </script>
+    </body>
+</html>
