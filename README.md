@@ -5,8 +5,12 @@
 ## BigText Makes Text Big 
 
 * Read the [original blog post](http://www.zachleat.com/web/bigtext-makes-text-big/)
-* Play around on the [demo](http://www.zachleat.com/bigtext/)
+* Play around on the [demo](http://zachleat.github.io/BigText/demo/wizard.html)
 * Watch the [video](http://www.youtube.com/watch?v=OuqB6e6NPRM)
+
+## [Download bigtext.js](https://zachleat.github.io/BigText/dist/bigtext.js)
+
+## [Run the Tests](http://zachleat.github.io/BigText/test/test.html)
 
 ## Requirements
 
@@ -164,6 +168,7 @@ The starting font-size must be small enough to guarantee that each individual li
 * `v0.1.3`
 * `v0.1.4` on `2013-08-24` Numerous bug fixes, improved accuracy, adds debug mode. 
 * `v0.1.5` on `2013-10-14` BigText uses all children by default (#40)
+* `v0.1.6` Various bug fixes.
 
 
 ## Using the repo
@@ -172,6 +177,7 @@ Run these commands:
 
  * `npm install`
  * `bower install`
+ * `grunt`
 
 ## Configuring Grunt
 

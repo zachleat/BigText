@@ -1,3 +1,8 @@
+/*! BigText - v0.1.6 - 2014-04-21
+ * https://github.com/zachleat/bigtext
+ * Copyright (c) 2014 Zach Leatherman (@zachleat)
+ * MIT License */
+
 (function(window, $) {
   "use strict";
 

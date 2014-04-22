@@ -1,7 +1,7 @@
 {
-	"name": "GRUNTLERPLATE",
-	"version": "0.0.0",
-	"main": ["dist/GRUNTLERPLATE.js"],
+	"name": "bigtext",
+	"version": "0.1.6",
+	"main": ["dist/bigtext.js"],
 	"ignore": [
 		"**/.*"
 	],
