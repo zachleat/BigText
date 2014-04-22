@@ -1,12 +1,14 @@
 {
-	"name": "bigtext",
-	"version": "0.1.6",
-	"main": ["dist/bigtext.js"],
-	"ignore": [
-		"**/.*"
-	],
-	"dependencies": {
-		"jquery": ">=1.9.1 <2.0.0",
-		"qunit": ">=1.12.0"
-	}
+  "name": "bigtext",
+  "version": "0.1.6",
+  "main": ["dist/bigtext.js"],
+  "ignore": [
+    "**/.*"
+  ],
+  "dependencies": {
+    "jquery": ">=1.9.1 <2.0.0"
+  },
+  "devDependencies": {
+    "qunit": ">=1.12.0"
+  }
 }
