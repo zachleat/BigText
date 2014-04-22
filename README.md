@@ -10,6 +10,8 @@
 
 ## [Download bigtext.js](https://zachleat.github.io/BigText/dist/bigtext.js)
 
+Or use [bower](http://bower.io/): `bower install bigtext`
+
 ## [Run the Tests](http://zachleat.github.io/BigText/test/test.html)
 
 ## Requirements
