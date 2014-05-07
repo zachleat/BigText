@@ -126,7 +126,7 @@ Works also with `letter-spacing`, `word-spacing`, and `text-transform`.
     </div>
     <script>
     $('#bigtext').bigtext({
-        maxfontsize: 60 // default is 48 (in px)
+        maxfontsize: 60 // default is 528 (in px)
     });
     </script>
 
