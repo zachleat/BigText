@@ -19,6 +19,10 @@ Or use [bower](http://bower.io/): `bower install bigtext`
 1. jQuery
 1. A block level parent element. BigText will force all children to be block level as well.
 
+## Learn More
+
+BigText works best on browsers that support [subpixel font scaling](http://status.modern.ie/subpixelfontscaling). In order to best serve sizes to all browsers, BigText will adjust `word-spacing` as well as `font-size`.
+
 ## Examples
 
 ### Simple Example
