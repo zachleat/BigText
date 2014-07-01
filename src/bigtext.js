@@ -23,7 +23,7 @@
       },
       test: {
         noFractionalFontSize: (function() {
-          if( !( 'getComputedStyle' in window ) || !( 'body' in document ) ) {
+          if( !( 'getComputedStyle' in window ) || !( 'body' in document ) || document.body == null ) {
             return true;
           }
           var test = $('<div/>').css({
