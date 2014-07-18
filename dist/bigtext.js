@@ -1,4 +1,4 @@
-/*! BigText - v0.1.6 - 2014-04-21
+/*! BigText - v0.1.6 - 2014-07-01
  * https://github.com/zachleat/bigtext
  * Copyright (c) 2014 Zach Leatherman (@zachleat)
  * MIT License */
@@ -28,7 +28,7 @@
       },
       test: {
         noFractionalFontSize: (function() {
-          if( !( 'getComputedStyle' in window ) || !( 'body' in document ) ) {
+          if( !( 'getComputedStyle' in window ) || !( 'body' in document ) || document.body == null ) {
             return true;
           }
           var test = $('<div/>').css({
