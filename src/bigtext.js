@@ -22,8 +22,8 @@
         return BigText;
       },
       test: {
-        noFractionalFontSize: (function() {
-          if( !( 'getComputedStyle' in window ) || !( 'body' in document ) || document.body == null ) {
+        wholeNumberFontSizeOnly: function() {
+          if( !( 'getComputedStyle' in window ) || document.body == null ) {
             return true;
           }
           var test = $('<div/>').css({
@@ -32,10 +32,20 @@
             }).appendTo(document.body).get(0),
             computedStyle = window.getComputedStyle( test, null );
 
-          return computedStyle ? computedStyle.getPropertyValue( 'font-size' ) === '14px' : true;
-        })()
+          if( computedStyle ) {
+            return computedStyle.getPropertyValue( 'font-size' ) === '14px';
+          }
+          return true;
+        }
+      },
+      supports: {
+        wholeNumberFontSizeOnly: undefined
       },
       init: function() {
+        if( BigText.supports.wholeNumberFontSizeOnly === undefined ) {
+          BigText.supports.wholeNumberFontSizeOnly = BigText.test.wholeNumberFontSizeOnly();
+        }
+
         if(!$('#'+BigText.GLOBAL_STYLE_ID).length) {
           $headCache.append(BigText.generateStyleTag(BigText.GLOBAL_STYLE_ID, ['.bigtext * { white-space: nowrap; } .bigtext > * { display: block; }',
                                           '.bigtext .' + BigText.EXEMPT_CLASS + ', .bigtext .' + BigText.EXEMPT_CLASS + ' * { white-space: normal; }']));
@@ -191,7 +201,7 @@
     $children.css('float', 'left').each(function() {
       var $line = $(this),
         // TODO replace 8, 4 with a proportional size to the calculated font-size.
-        intervals = BigText.test.noFractionalFontSize ? [8, 4, 1] : [8, 4, 1, 0.1],
+        intervals = BigText.supports.wholeNumberFontSizeOnly ? [8, 4, 1] : [8, 4, 1, 0.1],
         lineMax,
         newFontSize;
 
