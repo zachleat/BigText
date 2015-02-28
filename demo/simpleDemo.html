@@ -4,6 +4,11 @@
         <meta charset="utf-8"/>
         <title>BigText on a List</title>
         <style>
+            html {
+                -moz-text-size-adjust: 100%;
+                -ms-text-size-adjust: 100%;
+                -webkit-text-size-adjust: 100%;
+            }
             ol {
                 width: 100%;
                 list-style-type: none;
@@ -26,6 +31,15 @@
             }
         </style>
 <![endif]-->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js"></script>
+        <script src="../dist/bigtext.js"></script>
+        <script>
+        $(document).ready(function() {
+            $('ol').bigtext({
+                //minfontsize: 30
+            });
+        });
+        </script>
     </head>
     <body>
         <ol>
@@ -48,13 +62,5 @@
         </ol>
 
         <ol id="test" style="width:600px"><li>This is</li><li>a longer second line</li><li>An even longer third line.</li></ol>
-
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js"></script>
-        <script src="../bigtext.js"></script>
-        <script>
-        $('ol').bigtext({
-            //minfontsize: 30
-        });
-        </script>
     </body>
 </html>
