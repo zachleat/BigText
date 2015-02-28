@@ -1,4 +1,4 @@
-/*! BigText - v0.1.7 - 2015-02-27
+/*! BigText - v0.1.8 - 2015-02-28
  * https://github.com/zachleat/bigtext
  * Copyright (c) 2015 Zach Leatherman (@zachleat)
  * MIT License */
@@ -49,16 +49,13 @@
         }
       },
       bindResize: function(eventName, resizeFunction) {
-        if($.throttle) {
-          // https://github.com/cowboy/jquery-throttle-debounce
-          $(window).unbind(eventName).bind(eventName, $.throttle(100, resizeFunction));
-        } else {
-          if($.fn.smartresize) {
-            // https://github.com/lrbabe/jquery-smartresize/
-            eventName = 'smartresize.' + eventName;
+        var timeoutId;
+        $(window).unbind(eventName).bind(eventName, function() {
+          if( timeoutId ) {
+            clearTimeout( timeoutId );
           }
-          $(window).unbind(eventName).bind(eventName, resizeFunction);
-        }
+          timeoutId = setTimeout( resizeFunction, 100 );
+        });
       },
       getStyleId: function(id)
       {

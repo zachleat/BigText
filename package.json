@@ -1,7 +1,7 @@
 {
   "name": "bigtext",
   "title": "BigText",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Calculates the font-size and word-spacing needed to match a line of text to a specific width. (jQuery plugin)",
   "keywords": [
     "grunt",
