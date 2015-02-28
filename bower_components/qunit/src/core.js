@@ -1,25 +1,29 @@
 var QUnit,
-	assert,
 	config,
 	onErrorFnPrev,
-	testId = 0,
-	fileName = (sourceFromStacktrace( 0 ) || "" ).replace(/(:\d+)+\)?/, "").replace(/.+\//, ""),
+	loggingCallbacks = {},
+	fileName = ( sourceFromStacktrace( 0 ) || "" ).replace( /(:\d+)+\)?/, "" ).replace( /.+\//, "" ),
 	toString = Object.prototype.toString,
 	hasOwn = Object.prototype.hasOwnProperty,
 	// Keep a local reference to Date (GH-283)
 	Date = window.Date,
+	now = Date.now || function() {
+		return new Date().getTime();
+	},
+	globalStartCalled = false,
+	runStarted = false,
 	setTimeout = window.setTimeout,
 	clearTimeout = window.clearTimeout,
 	defined = {
-		document: typeof window.document !== "undefined",
-		setTimeout: typeof window.setTimeout !== "undefined",
+		document: window.document !== undefined,
+		setTimeout: window.setTimeout !== undefined,
 		sessionStorage: (function() {
 			var x = "qunit-test-string";
 			try {
 				sessionStorage.setItem( x, x );
 				sessionStorage.removeItem( x );
 				return true;
-			} catch( e ) {
+			} catch ( e ) {
 				return false;
 			}
 		}())
@@ -61,147 +65,18 @@ var QUnit,
 	 * @return {Object} New object with only the own properties (recursively).
 	 */
 	objectValues = function( obj ) {
-		// Grunt 0.3.x uses an older version of jshint that still has jshint/jshint#392.
-		/*jshint newcap: false */
 		var key, val,
 			vals = QUnit.is( "array", obj ) ? [] : {};
 		for ( key in obj ) {
 			if ( hasOwn.call( obj, key ) ) {
-				val = obj[key];
-				vals[key] = val === Object(val) ? objectValues(val) : val;
+				val = obj[ key ];
+				vals[ key ] = val === Object( val ) ? objectValues( val ) : val;
 			}
 		}
 		return vals;
 	};
 
-
-// Root QUnit object.
-// `QUnit` initialized at top of scope
-QUnit = {
-
-	// call on start of module test to prepend name to all tests
-	module: function( name, testEnvironment ) {
-		config.currentModule = name;
-		config.currentModuleTestEnvironment = testEnvironment;
-		config.modules[name] = true;
-	},
-
-	asyncTest: function( testName, expected, callback ) {
-		if ( arguments.length === 2 ) {
-			callback = expected;
-			expected = null;
-		}
-
-		QUnit.test( testName, expected, callback, true );
-	},
-
-	test: function( testName, expected, callback, async ) {
-		var test,
-			nameHtml = "<span class='test-name'>" + escapeText( testName ) + "</span>";
-
-		if ( arguments.length === 2 ) {
-			callback = expected;
-			expected = null;
-		}
-
-		if ( config.currentModule ) {
-			nameHtml = "<span class='module-name'>" + escapeText( config.currentModule ) + "</span>: " + nameHtml;
-		}
-
-		test = new Test({
-			nameHtml: nameHtml,
-			testName: testName,
-			expected: expected,
-			async: async,
-			callback: callback,
-			module: config.currentModule,
-			moduleTestEnvironment: config.currentModuleTestEnvironment,
-			stack: sourceFromStacktrace( 2 )
-		});
-
-		if ( !validTest( test ) ) {
-			return;
-		}
-
-		test.queue();
-	},
-
-	// Specify the number of expected assertions to guarantee that failed test (no assertions are run at all) don't slip through.
-	expect: function( asserts ) {
-		if (arguments.length === 1) {
-			config.current.expected = asserts;
-		} else {
-			return config.current.expected;
-		}
-	},
-
-	start: function( count ) {
-		// QUnit hasn't been initialized yet.
-		// Note: RequireJS (et al) may delay onLoad
-		if ( config.semaphore === undefined ) {
-			QUnit.begin(function() {
-				// This is triggered at the top of QUnit.load, push start() to the event loop, to allow QUnit.load to finish first
-				setTimeout(function() {
-					QUnit.start( count );
-				});
-			});
-			return;
-		}
-
-		config.semaphore -= count || 1;
-		// don't start until equal number of stop-calls
-		if ( config.semaphore > 0 ) {
-			return;
-		}
-		// ignore if start is called more often then stop
-		if ( config.semaphore < 0 ) {
-			config.semaphore = 0;
-			QUnit.pushFailure( "Called start() while already started (QUnit.config.semaphore was 0 already)", null, sourceFromStacktrace(2) );
-			return;
-		}
-		// A slight delay, to avoid any current callbacks
-		if ( defined.setTimeout ) {
-			setTimeout(function() {
-				if ( config.semaphore > 0 ) {
-					return;
-				}
-				if ( config.timeout ) {
-					clearTimeout( config.timeout );
-				}
-
-				config.blocking = false;
-				process( true );
-			}, 13);
-		} else {
-			config.blocking = false;
-			process( true );
-		}
-	},
-
-	stop: function( count ) {
-		config.semaphore += count || 1;
-		config.blocking = true;
-
-		if ( config.testTimeout && defined.setTimeout ) {
-			clearTimeout( config.timeout );
-			config.timeout = setTimeout(function() {
-				QUnit.ok( false, "Test timed out" );
-				config.semaphore = 1;
-				QUnit.start();
-			}, config.testTimeout );
-		}
-	}
-};
-
-// We use the prototype to distinguish between properties that should
-// be exposed as globals (and in exports) and those that shouldn't
-(function() {
-	function F() {}
-	F.prototype = QUnit;
-	QUnit = new F();
-	// Make F QUnit's constructor so that we can add to the prototype later
-	QUnit.constructor = F;
-}());
+QUnit = {};
 
 /**
  * Config object: Maintain internal state
@@ -214,10 +89,6 @@ config = {
 
 	// block until document ready
 	blocking: true,
-
-	// when enabled, show only failing tests
-	// gets persisted through sessionStorage and can be changed in UI via checkbox
-	hidepassed: false,
 
 	// by default, run previously failed tests first
 	// very useful in combination with "Hide passed tests" checked
@@ -236,29 +107,38 @@ config = {
 	// when enabled, the id is set to `true` as a `QUnit.config` property
 	urlConfig: [
 		{
+			id: "hidepassed",
+			label: "Hide passed tests",
+			tooltip: "Only show tests and assertions that fail. Stored as query-strings."
+		},
+		{
 			id: "noglobals",
 			label: "Check for Globals",
-			tooltip: "Enabling this will test if any test introduces new properties on the `window` object. Stored as query-strings."
+			tooltip: "Enabling this will test if any test introduces new properties on the " +
+				"`window` object. Stored as query-strings."
 		},
 		{
 			id: "notrycatch",
 			label: "No try-catch",
-			tooltip: "Enabling this will run tests outside of a try-catch block. Makes debugging exceptions in IE reasonable. Stored as query-strings."
+			tooltip: "Enabling this will run tests outside of a try-catch block. Makes debugging " +
+				"exceptions in IE reasonable. Stored as query-strings."
 		}
 	],
 
 	// Set of all modules.
-	modules: {},
+	modules: [],
 
-	// logging callback queues
-	begin: [],
-	done: [],
-	log: [],
-	testStart: [],
-	testDone: [],
-	moduleStart: [],
-	moduleDone: []
+	// The first unnamed module
+	currentModule: {
+		name: "",
+		tests: []
+	},
+
+	callbacks: {}
 };
+
+// Push a loose unnamed module to the modules collection
+config.modules.push( config.currentModule );
 
 // Initialize more QUnit.config and QUnit.urlParams
 (function() {
@@ -283,22 +163,22 @@ config = {
 		}
 	}
 
+	if ( urlParams.filter === true ) {
+		delete urlParams.filter;
+	}
+
 	QUnit.urlParams = urlParams;
 
 	// String search anywhere in moduleName+testName
 	config.filter = urlParams.filter;
 
-	// Exact match of the module name
-	config.module = urlParams.module;
+	config.testId = [];
+	if ( urlParams.testId ) {
 
-	config.testNumber = [];
-	if ( urlParams.testNumber ) {
-
-		// Ensure that urlParams.testNumber is an array
-		urlParams.testNumber = [].concat( urlParams.testNumber );
-		for ( i = 0; i < urlParams.testNumber.length; i++ ) {
-			current = urlParams.testNumber[ i ];
-			config.testNumber.push( parseInt( current, 10 ) );
+		// Ensure that urlParams.testId is an array
+		urlParams.testId = [].concat( urlParams.testId );
+		for ( i = 0; i < urlParams.testId.length; i++ ) {
+			config.testId.push( urlParams.testId[ i ] );
 		}
 	}
 
@@ -306,74 +186,131 @@ config = {
 	QUnit.isLocal = location.protocol === "file:";
 }());
 
+// Root QUnit object.
+// `QUnit` initialized at top of scope
 extend( QUnit, {
 
-	config: config,
+	// call on start of module test to prepend name to all tests
+	module: function( name, testEnvironment ) {
+		var currentModule = {
+			name: name,
+			testEnvironment: testEnvironment,
+			tests: []
+		};
 
-	// Initialize the configuration options
-	init: function() {
-		extend( config, {
-			stats: { all: 0, bad: 0 },
-			moduleStats: { all: 0, bad: 0 },
-			started: +new Date(),
-			updateRate: 1000,
-			blocking: false,
-			autostart: true,
-			autorun: false,
-			filter: "",
-			queue: [],
-			semaphore: 1
+		// DEPRECATED: handles setup/teardown functions,
+		// beforeEach and afterEach should be used instead
+		if ( testEnvironment && testEnvironment.setup ) {
+			testEnvironment.beforeEach = testEnvironment.setup;
+			delete testEnvironment.setup;
+		}
+		if ( testEnvironment && testEnvironment.teardown ) {
+			testEnvironment.afterEach = testEnvironment.teardown;
+			delete testEnvironment.teardown;
+		}
+
+		config.modules.push( currentModule );
+		config.currentModule = currentModule;
+	},
+
+	// DEPRECATED: QUnit.asyncTest() will be removed in QUnit 2.0.
+	asyncTest: function( testName, expected, callback ) {
+		if ( arguments.length === 2 ) {
+			callback = expected;
+			expected = null;
+		}
+
+		QUnit.test( testName, expected, callback, true );
+	},
+
+	test: function( testName, expected, callback, async ) {
+		var test;
+
+		if ( arguments.length === 2 ) {
+			callback = expected;
+			expected = null;
+		}
+
+		test = new Test({
+			testName: testName,
+			expected: expected,
+			async: async,
+			callback: callback
 		});
 
-		var tests, banner, result,
-			qunit = id( "qunit" );
-
-		if ( qunit ) {
-			qunit.innerHTML =
-				"<h1 id='qunit-header'>" + escapeText( document.title ) + "</h1>" +
-				"<h2 id='qunit-banner'></h2>" +
-				"<div id='qunit-testrunner-toolbar'></div>" +
-				"<h2 id='qunit-userAgent'></h2>" +
-				"<ol id='qunit-tests'></ol>";
-		}
-
-		tests = id( "qunit-tests" );
-		banner = id( "qunit-banner" );
-		result = id( "qunit-testresult" );
-
-		if ( tests ) {
-			tests.innerHTML = "";
-		}
-
-		if ( banner ) {
-			banner.className = "";
-		}
-
-		if ( result ) {
-			result.parentNode.removeChild( result );
-		}
-
-		if ( tests ) {
-			result = document.createElement( "p" );
-			result.id = "qunit-testresult";
-			result.className = "result";
-			tests.parentNode.insertBefore( result, tests );
-			result.innerHTML = "Running...<br/>&nbsp;";
-		}
+		test.queue();
 	},
 
-	// Resets the test setup. Useful for tests that modify the DOM.
-	/*
-	DEPRECATED: Use multiple tests instead of resetting inside a test.
-	Use testStart or testDone for custom cleanup.
-	This method will throw an error in 2.0, and will be removed in 2.1
-	*/
-	reset: function() {
-		var fixture = id( "qunit-fixture" );
-		if ( fixture ) {
-			fixture.innerHTML = config.fixture;
-		}
+	skip: function( testName ) {
+		var test = new Test({
+			testName: testName,
+			skip: true
+		});
+
+		test.queue();
 	},
+
+	// DEPRECATED: The functionality of QUnit.start() will be altered in QUnit 2.0.
+	// In QUnit 2.0, invoking it will ONLY affect the `QUnit.config.autostart` blocking behavior.
+	start: function( count ) {
+		var globalStartAlreadyCalled = globalStartCalled;
+
+		if ( !config.current ) {
+			globalStartCalled = true;
+
+			if ( runStarted ) {
+				throw new Error( "Called start() outside of a test context while already started" );
+			} else if ( globalStartAlreadyCalled || count > 1 ) {
+				throw new Error( "Called start() outside of a test context too many times" );
+			} else if ( config.autostart ) {
+				throw new Error( "Called start() outside of a test context when " +
+					"QUnit.config.autostart was true" );
+			} else if ( !config.pageLoaded ) {
+
+				// The page isn't completely loaded yet, so bail out and let `QUnit.load` handle it
+				config.autostart = true;
+				return;
+			}
+		} else {
+
+			// If a test is running, adjust its semaphore
+			config.current.semaphore -= count || 1;
+
+			// Don't start until equal number of stop-calls
+			if ( config.current.semaphore > 0 ) {
+				return;
+			}
+
+			// throw an Error if start is called more often than stop
+			if ( config.current.semaphore < 0 ) {
+				config.current.semaphore = 0;
+
+				QUnit.pushFailure(
+					"Called start() while already started (test's semaphore was 0 already)",
+					sourceFromStacktrace( 2 )
+				);
+				return;
+			}
+		}
+
+		resumeProcessing();
+	},
+
+	// DEPRECATED: QUnit.stop() will be removed in QUnit 2.0.
+	stop: function( count ) {
+
+		// If there isn't a test running, don't allow QUnit.stop() to be called
+		if ( !config.current ) {
+			throw new Error( "Called stop() outside of a test context" );
+		}
+
+		// If a test is running, adjust its semaphore
+		config.current.semaphore += count || 1;
+
+		pauseProcessing();
+	},
+
+	config: config,
 
 	// Safe object type checking
 	is: function( type, obj ) {
@@ -390,12 +327,12 @@ extend( QUnit, {
 			return "null";
 		}
 
-		var match = toString.call( obj ).match(/^\[object\s(.*)\]$/),
-			type = match && match[1] || "";
+		var match = toString.call( obj ).match( /^\[object\s(.*)\]$/ ),
+			type = match && match[ 1 ] || "";
 
 		switch ( type ) {
 			case "Number":
-				if ( isNaN(obj) ) {
+				if ( isNaN( obj ) ) {
 					return "nan";
 				}
 				return "number";
@@ -413,355 +350,65 @@ extend( QUnit, {
 		return undefined;
 	},
 
-	push: function( result, actual, expected, message ) {
-		if ( !config.current ) {
-			throw new Error( "assertion outside test context, was " + sourceFromStacktrace() );
-		}
-
-		var output, source,
-			details = {
-				module: config.current.module,
-				name: config.current.testName,
-				result: result,
-				message: message,
-				actual: actual,
-				expected: expected
-			};
-
-		message = escapeText( message ) || ( result ? "okay" : "failed" );
-		message = "<span class='test-message'>" + message + "</span>";
-		output = message;
-
-		if ( !result ) {
-			expected = escapeText( QUnit.jsDump.parse(expected) );
-			actual = escapeText( QUnit.jsDump.parse(actual) );
-			output += "<table><tr class='test-expected'><th>Expected: </th><td><pre>" + expected + "</pre></td></tr>";
-
-			if ( actual !== expected ) {
-				output += "<tr class='test-actual'><th>Result: </th><td><pre>" + actual + "</pre></td></tr>";
-				output += "<tr class='test-diff'><th>Diff: </th><td><pre>" + QUnit.diff( expected, actual ) + "</pre></td></tr>";
-			}
-
-			source = sourceFromStacktrace();
-
-			if ( source ) {
-				details.source = source;
-				output += "<tr class='test-source'><th>Source: </th><td><pre>" + escapeText( source ) + "</pre></td></tr>";
-			}
-
-			output += "</table>";
-		}
-
-		runLoggingCallbacks( "log", QUnit, details );
-
-		config.current.assertions.push({
-			result: !!result,
-			message: output
-		});
-	},
-
-	pushFailure: function( message, source, actual ) {
-		if ( !config.current ) {
-			throw new Error( "pushFailure() assertion outside test context, was " + sourceFromStacktrace(2) );
-		}
-
-		var output,
-			details = {
-				module: config.current.module,
-				name: config.current.testName,
-				result: false,
-				message: message
-			};
-
-		message = escapeText( message ) || "error";
-		message = "<span class='test-message'>" + message + "</span>";
-		output = message;
-
-		output += "<table>";
-
-		if ( actual ) {
-			output += "<tr class='test-actual'><th>Result: </th><td><pre>" + escapeText( actual ) + "</pre></td></tr>";
-		}
-
-		if ( source ) {
-			details.source = source;
-			output += "<tr class='test-source'><th>Source: </th><td><pre>" + escapeText( source ) + "</pre></td></tr>";
-		}
-
-		output += "</table>";
-
-		runLoggingCallbacks( "log", QUnit, details );
-
-		config.current.assertions.push({
-			result: false,
-			message: output
-		});
-	},
-
-	url: function( params ) {
-		params = extend( extend( {}, QUnit.urlParams ), params );
-		var key,
-			querystring = "?";
-
-		for ( key in params ) {
-			if ( hasOwn.call( params, key ) ) {
-				querystring += encodeURIComponent( key ) + "=" +
-					encodeURIComponent( params[ key ] ) + "&";
-			}
-		}
-		return window.location.protocol + "//" + window.location.host +
-			window.location.pathname + querystring.slice( 0, -1 );
-	},
-
 	extend: extend,
-	id: id,
-	addEvent: addEvent,
-	addClass: addClass,
-	hasClass: hasClass,
-	removeClass: removeClass
-	// load, equiv, jsDump, diff: Attached later
+
+	load: function() {
+		config.pageLoaded = true;
+
+		// Initialize the configuration options
+		extend( config, {
+			stats: { all: 0, bad: 0 },
+			moduleStats: { all: 0, bad: 0 },
+			started: 0,
+			updateRate: 1000,
+			autostart: true,
+			filter: ""
+		}, true );
+
+		config.blocking = false;
+
+		if ( config.autostart ) {
+			resumeProcessing();
+		}
+	}
 });
 
-/**
- * @deprecated: Created for backwards compatibility with test runner that set the hook function
- * into QUnit.{hook}, instead of invoking it and passing the hook function.
- * QUnit.constructor is set to the empty F() above so that we can add to it's prototype here.
- * Doing this allows us to tell if the following methods have been overwritten on the actual
- * QUnit object.
- */
-extend( QUnit.constructor.prototype, {
+// Register logging callbacks
+(function() {
+	var i, l, key,
+		callbacks = [ "begin", "done", "log", "testStart", "testDone",
+			"moduleStart", "moduleDone" ];
 
-	// Logging callbacks; all receive a single argument with the listed properties
-	// run test/logs.html for any related changes
-	begin: registerLoggingCallback( "begin" ),
-
-	// done: { failed, passed, total, runtime }
-	done: registerLoggingCallback( "done" ),
-
-	// log: { result, actual, expected, message }
-	log: registerLoggingCallback( "log" ),
-
-	// testStart: { name }
-	testStart: registerLoggingCallback( "testStart" ),
-
-	// testDone: { name, failed, passed, total, runtime }
-	testDone: registerLoggingCallback( "testDone" ),
-
-	// moduleStart: { name }
-	moduleStart: registerLoggingCallback( "moduleStart" ),
-
-	// moduleDone: { name, failed, passed, total }
-	moduleDone: registerLoggingCallback( "moduleDone" )
-});
-
-if ( !defined.document || document.readyState === "complete" ) {
-	config.autorun = true;
-}
-
-QUnit.load = function() {
-	runLoggingCallbacks( "begin", QUnit, {} );
-
-	// Initialize the config, saving the execution queue
-	var banner, filter, i, j, label, len, main, ol, toolbar, val, selection,
-		urlConfigContainer, moduleFilter, userAgent,
-		numModules = 0,
-		moduleNames = [],
-		moduleFilterHtml = "",
-		urlConfigHtml = "",
-		oldconfig = extend( {}, config );
-
-	QUnit.init();
-	extend(config, oldconfig);
-
-	config.blocking = false;
-
-	len = config.urlConfig.length;
-
-	for ( i = 0; i < len; i++ ) {
-		val = config.urlConfig[i];
-		if ( typeof val === "string" ) {
-			val = {
-				id: val,
-				label: val
-			};
-		}
-		config[ val.id ] = QUnit.urlParams[ val.id ];
-		if ( !val.value || typeof val.value === "string" ) {
-			urlConfigHtml += "<input id='qunit-urlconfig-" + escapeText( val.id ) +
-				"' name='" + escapeText( val.id ) +
-				"' type='checkbox'" +
-				( val.value ? " value='" + escapeText( val.value ) + "'" : "" ) +
-				( config[ val.id ] ? " checked='checked'" : "" ) +
-				" title='" + escapeText( val.tooltip ) +
-				"'><label for='qunit-urlconfig-" + escapeText( val.id ) +
-				"' title='" + escapeText( val.tooltip ) + "'>" + val.label + "</label>";
-		} else {
-			urlConfigHtml += "<label for='qunit-urlconfig-" + escapeText( val.id ) +
-				"' title='" + escapeText( val.tooltip ) +
-				"'>" + val.label +
-				": </label><select id='qunit-urlconfig-" + escapeText( val.id ) +
-				"' name='" + escapeText( val.id ) +
-				"' title='" + escapeText( val.tooltip ) +
-				"'><option></option>";
-			selection = false;
-			if ( QUnit.is( "array", val.value ) ) {
-				for ( j = 0; j < val.value.length; j++ ) {
-					urlConfigHtml += "<option value='" + escapeText( val.value[j] ) + "'" +
-						( config[ val.id ] === val.value[j] ?
-							(selection = true) && " selected='selected'" :
-							"" ) +
-						">" + escapeText( val.value[j] ) + "</option>";
-				}
-			} else {
-				for ( j in val.value ) {
-					if ( hasOwn.call( val.value, j ) ) {
-						urlConfigHtml += "<option value='" + escapeText( j ) + "'" +
-							( config[ val.id ] === j ?
-								(selection = true) && " selected='selected'" :
-								"" ) +
-							">" + escapeText( val.value[j] ) + "</option>";
-					}
-				}
+	function registerLoggingCallback( key ) {
+		var loggingCallback = function( callback ) {
+			if ( QUnit.objectType( callback ) !== "function" ) {
+				throw new Error(
+					"QUnit logging methods require a callback function as their first parameters."
+				);
 			}
-			if ( config[ val.id ] && !selection ) {
-				urlConfigHtml += "<option value='" + escapeText( config[ val.id ] ) +
-					"' selected='selected' disabled='disabled'>" +
-					escapeText( config[ val.id ] ) +
-					"</option>";
-			}
-			urlConfigHtml += "</select>";
+
+			config.callbacks[ key ].push( callback );
+		};
+
+		// DEPRECATED: This will be removed on QUnit 2.0.0+
+		// Stores the registered functions allowing restoring
+		// at verifyLoggingCallbacks() if modified
+		loggingCallbacks[ key ] = loggingCallback;
+
+		return loggingCallback;
+	}
+
+	for ( i = 0, l = callbacks.length; i < l; i++ ) {
+		key = callbacks[ i ];
+
+		// Initialize key collection of logging callback
+		if ( QUnit.objectType( config.callbacks[ key ] ) === "undefined" ) {
+			config.callbacks[ key ] = [];
 		}
+
+		QUnit[ key ] = registerLoggingCallback( key );
 	}
-	for ( i in config.modules ) {
-		if ( config.modules.hasOwnProperty( i ) ) {
-			moduleNames.push(i);
-		}
-	}
-	numModules = moduleNames.length;
-	moduleNames.sort( function( a, b ) {
-		return a.localeCompare( b );
-	});
-	moduleFilterHtml += "<label for='qunit-modulefilter'>Module: </label><select id='qunit-modulefilter' name='modulefilter'><option value='' " +
-		( config.module === undefined  ? "selected='selected'" : "" ) +
-		">< All Modules ></option>";
-
-
-	for ( i = 0; i < numModules; i++) {
-			moduleFilterHtml += "<option value='" + escapeText( encodeURIComponent(moduleNames[i]) ) + "' " +
-				( config.module === moduleNames[i] ? "selected='selected'" : "" ) +
-				">" + escapeText(moduleNames[i]) + "</option>";
-	}
-	moduleFilterHtml += "</select>";
-
-	// `userAgent` initialized at top of scope
-	userAgent = id( "qunit-userAgent" );
-	if ( userAgent ) {
-		userAgent.innerHTML = navigator.userAgent;
-	}
-
-	// `banner` initialized at top of scope
-	banner = id( "qunit-header" );
-	if ( banner ) {
-		banner.innerHTML = "<a href='" + QUnit.url({ filter: undefined, module: undefined, testNumber: undefined }) + "'>" + banner.innerHTML + "</a> ";
-	}
-
-	// `toolbar` initialized at top of scope
-	toolbar = id( "qunit-testrunner-toolbar" );
-	if ( toolbar ) {
-		// `filter` initialized at top of scope
-		filter = document.createElement( "input" );
-		filter.type = "checkbox";
-		filter.id = "qunit-filter-pass";
-
-		addEvent( filter, "click", function() {
-			var tmp,
-				ol = id( "qunit-tests" );
-
-			if ( filter.checked ) {
-				ol.className = ol.className + " hidepass";
-			} else {
-				tmp = " " + ol.className.replace( /[\n\t\r]/g, " " ) + " ";
-				ol.className = tmp.replace( / hidepass /, " " );
-			}
-			if ( defined.sessionStorage ) {
-				if (filter.checked) {
-					sessionStorage.setItem( "qunit-filter-passed-tests", "true" );
-				} else {
-					sessionStorage.removeItem( "qunit-filter-passed-tests" );
-				}
-			}
-		});
-
-		if ( config.hidepassed || defined.sessionStorage && sessionStorage.getItem( "qunit-filter-passed-tests" ) ) {
-			filter.checked = true;
-			// `ol` initialized at top of scope
-			ol = id( "qunit-tests" );
-			ol.className = ol.className + " hidepass";
-		}
-		toolbar.appendChild( filter );
-
-		// `label` initialized at top of scope
-		label = document.createElement( "label" );
-		label.setAttribute( "for", "qunit-filter-pass" );
-		label.setAttribute( "title", "Only show tests and assertions that fail. Stored in sessionStorage." );
-		label.innerHTML = "Hide passed tests";
-		toolbar.appendChild( label );
-
-		urlConfigContainer = document.createElement("span");
-		urlConfigContainer.innerHTML = urlConfigHtml;
-		// For oldIE support:
-		// * Add handlers to the individual elements instead of the container
-		// * Use "click" instead of "change" for checkboxes
-		// * Fallback from event.target to event.srcElement
-		addEvents( urlConfigContainer.getElementsByTagName("input"), "click", function( event ) {
-			var params = {},
-				target = event.target || event.srcElement;
-			params[ target.name ] = target.checked ?
-				target.defaultValue || true :
-				undefined;
-			window.location = QUnit.url( params );
-		});
-		addEvents( urlConfigContainer.getElementsByTagName("select"), "change", function( event ) {
-			var params = {},
-				target = event.target || event.srcElement;
-			params[ target.name ] = target.options[ target.selectedIndex ].value || undefined;
-			window.location = QUnit.url( params );
-		});
-		toolbar.appendChild( urlConfigContainer );
-
-		if (numModules > 1) {
-			moduleFilter = document.createElement( "span" );
-			moduleFilter.setAttribute( "id", "qunit-modulefilter-container" );
-			moduleFilter.innerHTML = moduleFilterHtml;
-			addEvent( moduleFilter.lastChild, "change", function() {
-				var selectBox = moduleFilter.getElementsByTagName("select")[0],
-					selectedModule = decodeURIComponent(selectBox.options[selectBox.selectedIndex].value);
-
-				window.location = QUnit.url({
-					module: ( selectedModule === "" ) ? undefined : selectedModule,
-					// Remove any existing filters
-					filter: undefined,
-					testNumber: undefined
-				});
-			});
-			toolbar.appendChild(moduleFilter);
-		}
-	}
-
-	// `main` initialized at top of scope
-	main = id( "qunit-fixture" );
-	if ( main ) {
-		config.fixture = main.innerHTML;
-	}
-
-	if ( config.autostart ) {
-		QUnit.start();
-	}
-};
-
-if ( defined.document ) {
-	addEvent( window, "load", QUnit.load );
-}
+})();
 
 // `onErrorFnPrev` initialized at top of scope
 // Preserve other handlers
@@ -770,7 +417,7 @@ onErrorFnPrev = window.onerror;
 // Cover uncaught exceptions
 // Returning true will suppress the default browser handler,
 // returning false will let it run.
-window.onerror = function ( error, filePath, linerNr ) {
+window.onerror = function( error, filePath, linerNr ) {
 	var ret = false;
 	if ( onErrorFnPrev ) {
 		ret = onErrorFnPrev( error, filePath, linerNr );
@@ -785,9 +432,9 @@ window.onerror = function ( error, filePath, linerNr ) {
 			}
 			QUnit.pushFailure( error, filePath + ":" + linerNr );
 		} else {
-			QUnit.test( "global failure", extend( function() {
+			QUnit.test( "global failure", extend(function() {
 				QUnit.pushFailure( error, filePath + ":" + linerNr );
-			}, { validTest: validTest } ) );
+			}, { validTest: true } ) );
 		}
 		return false;
 	}
@@ -796,71 +443,27 @@ window.onerror = function ( error, filePath, linerNr ) {
 };
 
 function done() {
+	var runtime, passed;
+
 	config.autorun = true;
 
 	// Log the last module results
 	if ( config.previousModule ) {
-		runLoggingCallbacks( "moduleDone", QUnit, {
-			name: config.previousModule,
+		runLoggingCallbacks( "moduleDone", {
+			name: config.previousModule.name,
+			tests: config.previousModule.tests,
 			failed: config.moduleStats.bad,
 			passed: config.moduleStats.all - config.moduleStats.bad,
-			total: config.moduleStats.all
+			total: config.moduleStats.all,
+			runtime: now() - config.moduleStats.started
 		});
 	}
 	delete config.previousModule;
 
-	var i, key,
-		banner = id( "qunit-banner" ),
-		tests = id( "qunit-tests" ),
-		runtime = +new Date() - config.started,
-		passed = config.stats.all - config.stats.bad,
-		html = [
-			"Tests completed in ",
-			runtime,
-			" milliseconds.<br/>",
-			"<span class='passed'>",
-			passed,
-			"</span> assertions of <span class='total'>",
-			config.stats.all,
-			"</span> passed, <span class='failed'>",
-			config.stats.bad,
-			"</span> failed."
-		].join( "" );
+	runtime = now() - config.started;
+	passed = config.stats.all - config.stats.bad;
 
-	if ( banner ) {
-		banner.className = ( config.stats.bad ? "qunit-fail" : "qunit-pass" );
-	}
-
-	if ( tests ) {
-		id( "qunit-testresult" ).innerHTML = html;
-	}
-
-	if ( config.altertitle && defined.document && document.title ) {
-		// show ✖ for good, ✔ for bad suite result in title
-		// use escape sequences in case file gets loaded with non-utf-8-charset
-		document.title = [
-			( config.stats.bad ? "\u2716" : "\u2714" ),
-			document.title.replace( /^[\u2714\u2716] /i, "" )
-		].join( " " );
-	}
-
-	// clear own sessionStorage items if all tests passed
-	if ( config.reorder && defined.sessionStorage && config.stats.bad === 0 ) {
-		// `key` & `i` initialized at top of scope
-		for ( i = 0; i < sessionStorage.length; i++ ) {
-			key = sessionStorage.key( i++ );
-			if ( key.indexOf( "qunit-test-" ) === 0 ) {
-				sessionStorage.removeItem( key );
-			}
-		}
-	}
-
-	// scroll back to top to show results
-	if ( config.scrolltop && window.scrollTo ) {
-		window.scrollTo(0, 0);
-	}
-
-	runLoggingCallbacks( "done", QUnit, {
+	runLoggingCallbacks( "done", {
 		failed: config.stats.bad,
 		passed: passed,
 		total: config.stats.all,
@@ -868,62 +471,22 @@ function done() {
 	});
 }
 
-/** @return Boolean: true if this test should be ran */
-function validTest( test ) {
-	var include,
-		filter = config.filter && config.filter.toLowerCase(),
-		module = config.module && config.module.toLowerCase(),
-		fullName = ( test.module + ": " + test.testName ).toLowerCase();
-
-	// Internally-generated tests are always valid
-	if ( test.callback && test.callback.validTest === validTest ) {
-		delete test.callback.validTest;
-		return true;
-	}
-
-	if ( config.testNumber.length > 0 ) {
-		if ( inArray( test.testNumber, config.testNumber ) < 0 ) {
-			return false;
-		}
-	}
-
-	if ( module && ( !test.module || test.module.toLowerCase() !== module ) ) {
-		return false;
-	}
-
-	if ( !filter ) {
-		return true;
-	}
-
-	include = filter.charAt( 0 ) !== "!";
-	if ( !include ) {
-		filter = filter.slice( 1 );
-	}
-
-	// If the filter matches, we need to honour include
-	if ( fullName.indexOf( filter ) !== -1 ) {
-		return include;
-	}
-
-	// Otherwise, do the opposite
-	return !include;
-}
-
-// so far supports only Firefox, Chrome and Opera (buggy), Safari (for real exceptions)
-// Later Safari and IE10 are supposed to support error.stack as well
+// Doesn't support IE6 to IE9
 // See also https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Error/Stack
 function extractStacktrace( e, offset ) {
-	offset = offset === undefined ? 3 : offset;
+	offset = offset === undefined ? 4 : offset;
 
 	var stack, include, i;
 
 	if ( e.stacktrace ) {
-		// Opera
+
+		// Opera 12.x
 		return e.stacktrace.split( "\n" )[ offset + 3 ];
 	} else if ( e.stack ) {
-		// Firefox, Chrome
+
+		// Firefox, Chrome, Safari 6+, IE10+, PhantomJS and Node
 		stack = e.stack.split( "\n" );
-		if (/^error$/i.test( stack[0] ) ) {
+		if ( /^error$/i.test( stack[ 0 ] ) ) {
 			stack.shift();
 		}
 		if ( fileName ) {
@@ -940,50 +503,38 @@ function extractStacktrace( e, offset ) {
 		}
 		return stack[ offset ];
 	} else if ( e.sourceURL ) {
-		// Safari, PhantomJS
-		// hopefully one day Safari provides actual stacktraces
+
+		// Safari < 6
 		// exclude useless self-reference for generated Error objects
 		if ( /qunit.js$/.test( e.sourceURL ) ) {
 			return;
 		}
+
 		// for actual exceptions, this is useful
 		return e.sourceURL + ":" + e.line;
 	}
 }
-function sourceFromStacktrace( offset ) {
-	try {
-		throw new Error();
-	} catch ( e ) {
-		return extractStacktrace( e, offset );
-	}
-}
 
-/**
- * Escape text for attribute or text content.
- */
-function escapeText( s ) {
-	if ( !s ) {
-		return "";
-	}
-	s = s + "";
-	// Both single quotes and double quotes (for attributes)
-	return s.replace( /['"<>&]/g, function( s ) {
-		switch( s ) {
-			case "'":
-				return "&#039;";
-			case "\"":
-				return "&quot;";
-			case "<":
-				return "&lt;";
-			case ">":
-				return "&gt;";
-			case "&":
-				return "&amp;";
+function sourceFromStacktrace( offset ) {
+	var e = new Error();
+	if ( !e.stack ) {
+		try {
+			throw e;
+		} catch ( err ) {
+			// This should already be true in most browsers
+			e = err;
 		}
-	});
+	}
+	return extractStacktrace( e, offset );
 }
 
 function synchronize( callback, last ) {
+	if ( QUnit.objectType( callback ) === "array" ) {
+		while ( callback.length ) {
+			synchronize( callback.shift() );
+		}
+		return;
+	}
 	config.queue.push( callback );
 
 	if ( config.autorun && !config.blocking ) {
@@ -995,11 +546,17 @@ function process( last ) {
 	function next() {
 		process( last );
 	}
-	var start = new Date().getTime();
-	config.depth = config.depth ? config.depth + 1 : 1;
+	var start = now();
+	config.depth = ( config.depth || 0 ) + 1;
 
 	while ( config.queue.length && !config.blocking ) {
-		if ( !defined.setTimeout || config.updateRate <= 0 || ( ( new Date().getTime() - start ) < config.updateRate ) ) {
+		if ( !defined.setTimeout || config.updateRate <= 0 ||
+				( ( now() - start ) < config.updateRate ) ) {
+			if ( config.current ) {
+
+				// Reset async tracking for each phase of the Test lifecycle
+				config.current.usedAsync = false;
+			}
 			config.queue.shift()();
 		} else {
 			setTimeout( next, 13 );
@@ -1009,6 +566,79 @@ function process( last ) {
 	config.depth--;
 	if ( last && !config.blocking && !config.queue.length && config.depth === 0 ) {
 		done();
+	}
+}
+
+function begin() {
+	var i, l,
+		modulesLog = [];
+
+	// If the test run hasn't officially begun yet
+	if ( !config.started ) {
+
+		// Record the time of the test run's beginning
+		config.started = now();
+
+		verifyLoggingCallbacks();
+
+		// Delete the loose unnamed module if unused.
+		if ( config.modules[ 0 ].name === "" && config.modules[ 0 ].tests.length === 0 ) {
+			config.modules.shift();
+		}
+
+		// Avoid unnecessary information by not logging modules' test environments
+		for ( i = 0, l = config.modules.length; i < l; i++ ) {
+			modulesLog.push({
+				name: config.modules[ i ].name,
+				tests: config.modules[ i ].tests
+			});
+		}
+
+		// The test run is officially beginning now
+		runLoggingCallbacks( "begin", {
+			totalTests: Test.count,
+			modules: modulesLog
+		});
+	}
+
+	config.blocking = false;
+	process( true );
+}
+
+function resumeProcessing() {
+	runStarted = true;
+
+	// A slight delay to allow this iteration of the event loop to finish (more assertions, etc.)
+	if ( defined.setTimeout ) {
+		setTimeout(function() {
+			if ( config.current && config.current.semaphore > 0 ) {
+				return;
+			}
+			if ( config.timeout ) {
+				clearTimeout( config.timeout );
+			}
+
+			begin();
+		}, 13 );
+	} else {
+		begin();
+	}
+}
+
+function pauseProcessing() {
+	config.blocking = true;
+
+	if ( config.testTimeout && defined.setTimeout ) {
+		clearTimeout( config.timeout );
+		config.timeout = setTimeout(function() {
+			if ( config.current ) {
+				config.current.semaphore = 0;
+				QUnit.pushFailure( "Test timed out", sourceFromStacktrace( 2 ) );
+			} else {
+				throw new Error( "Test timed out" );
+			}
+			resumeProcessing();
+		}, config.testTimeout );
 	}
 }
 
@@ -1037,12 +667,12 @@ function checkPollution() {
 
 	newGlobals = diff( config.pollution, old );
 	if ( newGlobals.length > 0 ) {
-		QUnit.pushFailure( "Introduced global variable(s): " + newGlobals.join(", ") );
+		QUnit.pushFailure( "Introduced global variable(s): " + newGlobals.join( ", " ) );
 	}
 
 	deletedGlobals = diff( old, config.pollution );
 	if ( deletedGlobals.length > 0 ) {
-		QUnit.pushFailure( "Deleted global variable(s): " + deletedGlobals.join(", ") );
+		QUnit.pushFailure( "Deleted global variable(s): " + deletedGlobals.join( ", " ) );
 	}
 }
 
@@ -1053,7 +683,7 @@ function diff( a, b ) {
 
 	for ( i = 0; i < result.length; i++ ) {
 		for ( j = 0; j < b.length; j++ ) {
-			if ( result[i] === b[j] ) {
+			if ( result[ i ] === b[ j ] ) {
 				result.splice( i, 1 );
 				i--;
 				break;
@@ -1063,14 +693,15 @@ function diff( a, b ) {
 	return result;
 }
 
-function extend( a, b ) {
+function extend( a, b, undefOnly ) {
 	for ( var prop in b ) {
 		if ( hasOwn.call( b, prop ) ) {
+
 			// Avoid "Member not found" error in IE8 caused by messing with window.constructor
 			if ( !( prop === "constructor" && a === window ) ) {
 				if ( b[ prop ] === undefined ) {
 					delete a[ prop ];
-				} else {
+				} else if ( !( undefOnly && typeof a[ prop ] !== "undefined" ) ) {
 					a[ prop ] = b[ prop ];
 				}
 			}
@@ -1080,78 +711,39 @@ function extend( a, b ) {
 	return a;
 }
 
-/**
- * @param {HTMLElement} elem
- * @param {string} type
- * @param {Function} fn
- */
-function addEvent( elem, type, fn ) {
-	if ( elem.addEventListener ) {
+function runLoggingCallbacks( key, args ) {
+	var i, l, callbacks;
 
-		// Standards-based browsers
-		elem.addEventListener( type, fn, false );
-	} else if ( elem.attachEvent ) {
-
-		// support: IE <9
-		elem.attachEvent( "on" + type, fn );
-	} else {
-
-		// Caller must ensure support for event listeners is present
-		throw new Error( "addEvent() was called in a context without event listener support" );
+	callbacks = config.callbacks[ key ];
+	for ( i = 0, l = callbacks.length; i < l; i++ ) {
+		callbacks[ i ]( args );
 	}
 }
 
-/**
- * @param {Array|NodeList} elems
- * @param {string} type
- * @param {Function} fn
- */
-function addEvents( elems, type, fn ) {
-	var i = elems.length;
-	while ( i-- ) {
-		addEvent( elems[i], type, fn );
-	}
-}
+// DEPRECATED: This will be removed on 2.0.0+
+// This function verifies if the loggingCallbacks were modified by the user
+// If so, it will restore it, assign the given callback and print a console warning
+function verifyLoggingCallbacks() {
+	var loggingCallback, userCallback;
 
-function hasClass( elem, name ) {
-	return (" " + elem.className + " ").indexOf(" " + name + " ") > -1;
-}
+	for ( loggingCallback in loggingCallbacks ) {
+		if ( QUnit[ loggingCallback ] !== loggingCallbacks[ loggingCallback ] ) {
 
-function addClass( elem, name ) {
-	if ( !hasClass( elem, name ) ) {
-		elem.className += (elem.className ? " " : "") + name;
-	}
-}
+			userCallback = QUnit[ loggingCallback ];
 
-function removeClass( elem, name ) {
-	var set = " " + elem.className + " ";
-	// Class name may appear multiple times
-	while ( set.indexOf(" " + name + " ") > -1 ) {
-		set = set.replace(" " + name + " " , " ");
-	}
-	// If possible, trim it for prettiness, but not necessarily
-	elem.className = typeof set.trim === "function" ? set.trim() : set.replace(/^\s+|\s+$/g, "");
-}
+			// Restore the callback function
+			QUnit[ loggingCallback ] = loggingCallbacks[ loggingCallback ];
 
-function id( name ) {
-	return defined.document && document.getElementById && document.getElementById( name );
-}
+			// Assign the deprecated given callback
+			QUnit[ loggingCallback ]( userCallback );
 
-function registerLoggingCallback( key ) {
-	return function( callback ) {
-		config[key].push( callback );
-	};
-}
-
-// Supports deprecated method of completely overwriting logging callbacks
-function runLoggingCallbacks( key, scope, args ) {
-	var i, callbacks;
-	if ( QUnit.hasOwnProperty( key ) ) {
-		QUnit[ key ].call(scope, args );
-	} else {
-		callbacks = config[ key ];
-		for ( i = 0; i < callbacks.length; i++ ) {
-			callbacks[ i ].call( scope, args );
+			if ( window.console && window.console.warn ) {
+				window.console.warn(
+					"QUnit." + loggingCallback + " was replaced with a new value.\n" +
+					"Please, check out the documentation on how to apply logging callbacks.\n" +
+					"Reference: http://api.qunitjs.com/category/callbacks/"
+				);
+			}
 		}
 	}
 }

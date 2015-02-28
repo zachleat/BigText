@@ -59,7 +59,7 @@ Antranig Basman <amb26ohloh@ponder.org.uk>
 Vivin Paliath <vivin.paliath@gmail.com>
 Joshua Niehus <jm.niehus@gmail.com>
 Glen Huang <curvedmark@gmail.com>
-Jonas Ulrich <jochenulrich@t-online.de>
+Jochen Ulrich <jochenulrich@t-online.de>
 Jamie Hoover <jamie@ninjaui.com>
 James M. Greene <james.m.greene@gmail.com>
 Rodney Rehm <mail+github@rodneyrehm.de>
@@ -81,3 +81,15 @@ Corey Frang <gnarf37@gmail.com>
 Nathan Dauber <nathan@radialogica.com>
 Michał Gołębiowski <m.goleb@gmail.com>
 XhmikosR <xhmikosr@yahoo.com>
+Patrick Stapleton <github@gdi2290.com>
+DarkPark <darkpark@pisem.net>
+Oleg Gaidarenko <markelog@gmail.com>
+Mike Sidorov <mikes.ekb@gmail.com>
+Don Kirkby <donkirkby@gmail.com>
+don <dkirkby@cfenet.ubc.ca>
+Sean Xu <jseanxu@live.com>
+Matthew Beale <matt.beale@madhatted.com>
+Mislav Marohnić <mislav.marohnic@gmail.com>
+Anne-Gaelle Colom <coloma@westminster.ac.uk>
+Leonardo Braga <leonardo.braga@gmail.com>
+Jon Bretman <jon.bretman@lyst.com>
