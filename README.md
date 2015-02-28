@@ -153,7 +153,7 @@ See [Paravel's FitText plugin](http://fittextjs.com/). Curious how the two plugi
 
 ### Re-BigText on Resize (Responsive BigText)
 
-BigText does not implement its own debounced resize event, to reduce duplicate code. However, it does search for existing implementations. For example, [Ben Alman's Throttle/Debounce plugin](https://github.com/cowboy/jquery-throttle-debounce) or [Louis-Remi Babe's SmartResize](https://github.com/lrbabe/jquery-smartresize/), in that order.  If no debounced plugin is found, BigText will bind to the native resize event.
+As of 0.1.8, BigText implements its own debounced resize event.
 
 ### Debug Mode
 

@@ -44,16 +44,13 @@
         }
       },
       bindResize: function(eventName, resizeFunction) {
-        if($.throttle) {
-          // https://github.com/cowboy/jquery-throttle-debounce
-          $(window).unbind(eventName).bind(eventName, $.throttle(100, resizeFunction));
-        } else {
-          if($.fn.smartresize) {
-            // https://github.com/lrbabe/jquery-smartresize/
-            eventName = 'smartresize.' + eventName;
+        var timeoutId;
+        $(window).unbind(eventName).bind(eventName, function() {
+          if( timeoutId ) {
+            clearTimeout( timeoutId );
           }
-          $(window).unbind(eventName).bind(eventName, resizeFunction);
-        }
+          timeoutId = setTimeout( resizeFunction, 100 );
+        });
       },
       getStyleId: function(id)
       {
