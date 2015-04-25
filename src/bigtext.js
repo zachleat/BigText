@@ -131,7 +131,9 @@
 
   function testLineDimensions($line, maxWidth, property, size, interval, units, previousWidth)
   {
-    var width;
+    var width,
+      return_size;
+
     previousWidth = typeof previousWidth === 'number' ? previousWidth : 0;
     $line.css(property, size + units);
 
@@ -142,9 +144,13 @@
       $line.css(property, '');
 
       if(width === maxWidth) {
+        return_size = parseFloat((parseFloat(size) - 0.1).toFixed(3));
+        if(BigText.supports.wholeNumberFontSizeOnly) {
+          return_size = Math.round(return_size);
+        }
         return {
           match: 'exact',
-          size: parseFloat((parseFloat(size) - 0.1).toFixed(3))
+          size: return_size
         };
       }
 
@@ -154,9 +160,14 @@
       var under = maxWidth - previousWidth,
         over = width - maxWidth;
 
+      return_size = parseFloat((parseFloat(size) - (property === 'word-spacing' && previousWidth && ( over < under ) ? 0 : interval)).toFixed(3));
+      if(BigText.supports.wholeNumberFontSizeOnly) {
+        return_size = Math.round(return_size);
+      }
+
       return {
         match: 'estimate',
-        size: parseFloat((parseFloat(size) - (property === 'word-spacing' && previousWidth && ( over < under ) ? 0 : interval)).toFixed(3))
+        size: return_size
       };
     }
 
@@ -253,7 +264,7 @@
       // must re-use font-size, even though it was removed above.
       $line.css('font-size', fontSizes[lineNumber] + 'px');
 
-      for(var m=1, n=3; m<n; m+=interval) {
+      for(var m=1, n=20; m<n; m+=interval) {
         maxWordSpacing = testLineDimensions($line, maxWidth, 'word-spacing', m, interval, 'px', maxWordSpacing);
         if(typeof maxWordSpacing !== 'number') {
           wordSpacing = maxWordSpacing.size;
