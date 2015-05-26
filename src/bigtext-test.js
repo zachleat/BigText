@@ -188,6 +188,19 @@
       'Font size should equal the maximum.');
   });
 
+  test('testCloseToMaxFontSize', function()
+  {
+    $('#qunit-fixture').html('<div id="test" style="width:140px"><div>Hello</div></div>');
+    $('#test').bigtext();
+    var font_size_without_max = $('#test > div').css('font-size');
+
+    $('#test').bigtext( { maxfontsize: parseInt(font_size_without_max)+1 } );
+    var font_size_with_max = $('#test > div').css('font-size');
+
+    equal(font_size_with_max, font_size_without_max,
+      'Font size should equal the maximum.');
+  });
+
   test('testUnbrokenSingleWord', function()
   {
     $('#qunit-fixture').html('<div id="test" style="width:300px"><div>This</div></div>');

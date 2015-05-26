@@ -1,4 +1,4 @@
-/*! BigText - v0.1.8 - 2015-02-28
+/*! BigText - v0.1.8 - 2015-05-25
  * https://github.com/zachleat/bigtext
  * Copyright (c) 2015 Zach Leatherman (@zachleat)
  * MIT License */
@@ -215,7 +215,7 @@
 
       outer: for(var m=0, n=intervals.length; m<n; m++) {
         inner: for(var j=1, k=10; j<=k; j++) {
-          if(newFontSize + j*intervals[m] > maxFontSize) {
+          if(newFontSize + j*intervals[m] - 10 > maxFontSize) {
             newFontSize = maxFontSize;
             break outer;
           }
