@@ -198,7 +198,7 @@
     var font_size_with_max = $('#test > div').css('font-size');
 
     equal(font_size_with_max, font_size_without_max,
-      'Font size should equal the maximum.');
+      'Font size should not equal the maximum.');
   });
 
   test('testUnbrokenSingleWord', function()
