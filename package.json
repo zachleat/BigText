@@ -26,7 +26,7 @@
   "dependencies": {},
   "devDependencies": {
     "grunt": "~0.4.4",
-    "grunt-contrib-jshint": "~0.11.3",
+    "grunt-contrib-jshint": "~0.12.0",
     "glob": "~6.0.1",
     "load-grunt-tasks": "~3.3.0",
     "matchdep": "~1.0.0",
