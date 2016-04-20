@@ -34,7 +34,7 @@
     "grunt-contrib-qunit": "~0.7.0",
     "grunt-contrib-watch": "~0.6.1",
     "grunt-gh-pages": "~1.0.0",
-    "grunt-contrib-concat": "~0.5.1",
+    "grunt-contrib-concat": "~1.0.1",
     "bytesize": "~0.2.0",
     "grunt-bytesize": "~0.1.1",
     "grunt-contrib-csslint": "~0.5.0",
