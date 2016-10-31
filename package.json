@@ -45,7 +45,7 @@
   },
   "peerDependencies": {},
   "engines": {
-    "node": ">=0.8.0",
+    "node": ">= 4",
     "npm": ">=1.2.10"
   },
   "license": "MIT",
