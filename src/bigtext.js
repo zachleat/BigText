@@ -98,7 +98,7 @@
 
         this.each(function()
         {
-          var flagFitHeight=(options.fit==BigText.FIT_HEIGHT);
+          var flagFitHeight=(options.fit===BigText.FIT_HEIGHT);
           var $t = $(this).addClass('bigtext'),
             maxSize = (flagFitHeight?$t.height():$t.width()),
             id = $t.attr('id'),
