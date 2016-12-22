@@ -9,6 +9,9 @@
       DEBUG_MODE: false,
       DEFAULT_MIN_FONT_SIZE_PX: null,
       DEFAULT_MAX_FONT_SIZE_PX: 528,
+      FIT_WIDTH:'width',
+      FIT_HEIGHT:'height',
+      DEFAULT_FIT:'width',
       GLOBAL_STYLE_ID: 'bigtext-style',
       STYLE_ID: 'bigtext-id',
       LINE_CLASS_PREFIX: 'bigtext-line',
@@ -89,13 +92,15 @@
           minfontsize: BigText.DEFAULT_MIN_FONT_SIZE_PX,
           maxfontsize: BigText.DEFAULT_MAX_FONT_SIZE_PX,
           childSelector: '',
-          resize: true
+          resize: true,
+          fit:BigText.DEFAULT_FIT
         }, options || {});
 
         this.each(function()
         {
+          var flagFitHeight=(options.fit===BigText.FIT_HEIGHT);
           var $t = $(this).addClass('bigtext'),
-            maxWidth = $t.width(),
+            maxSize = (flagFitHeight?$t.height():$t.width()),
             id = $t.attr('id'),
             $children = options.childSelector ? $t.find( options.childSelector ) : $t.children();
 
@@ -107,7 +112,7 @@
           if(options.resize) {
             BigText.bindResize('resize.bigtext-event-' + id, function()
             {
-              // TODO only call this if the width has changed.
+              // TODO only call this if the width/height has changed.
               BigText.jQueryMethod.call($('#' + id), options);
             });
           }
@@ -121,7 +126,7 @@
                 BigText.LINE_CLASS_PREFIX + lineNumber].join(' ');
           });
 
-          var sizes = calculateSizes($t, $children, maxWidth, options.maxfontsize, options.minfontsize);
+          var sizes = calculateSizes($t, $children, maxSize, options.maxfontsize, options.minfontsize,flagFitHeight);
           $headCache.append(BigText.generateCss(id, sizes.fontSizes, sizes.wordSpacings, sizes.minFontSizes));
         });
 
@@ -129,41 +134,41 @@
       }
     };
 
-  function testLineDimensions($line, maxWidth, property, size, interval, units, previousWidth)
+  function testLineDimensions($line, maxSize, property, fontSize, interval, units, previousSize,flagFitHeight)
   {
-    var width;
-    previousWidth = typeof previousWidth === 'number' ? previousWidth : 0;
-    $line.css(property, size + units);
+    var size;
+    previousSize = typeof previousSize === 'number' ? previousSize : 0;
+    $line.css(property, fontSize + units);
 
-    width = $line.width();
+    size = (flagFitHeight?$line.height():$line.width());
 
-    if(width >= maxWidth) {
-// console.log(width, ' previous: ' + previousWidth, property + ' at ' + interval, 'prior: ' + (parseFloat(size) - interval), 'new:' + parseFloat(size));
+    if(size >= maxSize) {
+// console.log(size, ' previous: ' + previousSize, property + ' at ' + interval, 'prior: ' + (parseFloat(fontSize) - interval), 'new:' + parseFloat(fontSize));
       $line.css(property, '');
 
-      if(width === maxWidth) {
+      if(size === maxSize) {
         return {
           match: 'exact',
-          size: parseFloat((parseFloat(size) - 0.1).toFixed(3))
+          size: parseFloat((parseFloat(fontSize) - 0.1).toFixed(3))
         };
       }
 
       // Since this is an estimate, we calculate how far over the width we went with the new value.
       // If this is word-spacing (our last resort guess) and the over is less than the under, we keep the higher value.
       // Otherwise, we revert to the underestimate.
-      var under = maxWidth - previousWidth,
-        over = width - maxWidth;
+      var under = maxSize - previousSize,
+        over = size - maxSize;
 
       return {
         match: 'estimate',
-        size: parseFloat((parseFloat(size) - (property === 'word-spacing' && previousWidth && ( over < under ) ? 0 : interval)).toFixed(3))
+        size: parseFloat((parseFloat(fontSize) - (property === 'word-spacing' && previousSize && ( over < under ) ? 0 : interval)).toFixed(3))
       };
     }
 
-    return width;
+    return size;
   }
 
-  function calculateSizes($t, $children, maxWidth, maxFontSize, minFontSize)
+  function calculateSizes($t, $children, maxSize, maxFontSize, minFontSize,flagFitHeight)
   {
     var $c = $t.clone(true)
       .addClass('bigtext-cloned')
@@ -204,9 +209,9 @@
       // TODO we can cache this ratio?
       var autoGuessSubtraction = 32, // font size in px
         currentFontSize = parseFloat($line.css('font-size')),
-        ratio = ( $line.width() / currentFontSize ).toFixed(6);
+        ratio = ( (flagFitHeight?$line.height():$line.width()) / currentFontSize ).toFixed(6);
 
-      newFontSize = parseInt( maxWidth / ratio, 10 ) - autoGuessSubtraction;
+      newFontSize = parseInt( maxSize / ratio, 10 ) - autoGuessSubtraction;
 
       outer: for(var m=0, n=intervals.length; m<n; m++) {
         inner: for(var j=1, k=10; j<=k; j++) {
@@ -215,7 +220,7 @@
             break outer;
           }
 
-          lineMax = testLineDimensions($line, maxWidth, 'font-size', newFontSize + j*intervals[m], intervals[m], 'px', lineMax);
+          lineMax = testLineDimensions($line, maxSize, 'font-size', newFontSize + j*intervals[m], intervals[m], 'px', lineMax, flagFitHeight);
           if(typeof lineMax !== 'number') {
             newFontSize = lineMax.size;
 
@@ -227,7 +232,7 @@
         }
       }
 
-      ratios.push(maxWidth / newFontSize);
+      ratios.push(maxSize / newFontSize);
 
       if(newFontSize > maxFontSize) {
         fontSizes.push(maxFontSize);
@@ -254,7 +259,7 @@
       $line.css('font-size', fontSizes[lineNumber] + 'px');
 
       for(var m=1, n=3; m<n; m+=interval) {
-        maxWordSpacing = testLineDimensions($line, maxWidth, 'word-spacing', m, interval, 'px', maxWordSpacing);
+        maxWordSpacing = testLineDimensions($line, maxSize, 'word-spacing', m, interval, 'px', maxWordSpacing, flagFitHeight);
         if(typeof maxWordSpacing !== 'number') {
           wordSpacing = maxWordSpacing.size;
           break;
