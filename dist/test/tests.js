@@ -35,7 +35,7 @@
     return this.css('float', 'left');
   };
 
-  BigTextTest.linesTest = function(selector, expectedWidth, options)
+  BigTextTest.linesTest = function(assert, selector, expectedWidth, options)
   {
     options = $.extend( options, {} );
 
@@ -51,12 +51,12 @@
     $lines.each(function(j)
     {
       var width = $(this).width();
-      ok(!(( minWidth < width ) && ( width < maxWidth )), 'Pretest: Line ' + j + ' should not be max width (' + minWidth + ' < ' + width + ' < ' + maxWidth + ', font-size: ' + $(this).css('font-size') + ')');
+      assert.ok(!(( minWidth < width ) && ( width < maxWidth )), 'Pretest: Line ' + j + ' should not be max width (' + minWidth + ' < ' + width + ' < ' + maxWidth + ', font-size: ' + $(this).css('font-size') + ')');
     });
 
     $test.bigtext(options);
 
-    ok('Class added.', $test.is('.bigtext'));
+    assert.ok('Class added.', $test.is('.bigtext'));
 
     $lines.each(function(j)
     {
@@ -72,138 +72,138 @@
         minHeight = expectedHeight - tolerance,
         maxHeight = expectedHeight + tolerance;
 
-      ok('Line ' + j + ' class added.', $t.is('.bigtext-line' + j));
+      assert.ok('Line ' + j + ' class added.', $t.is('.bigtext-line' + j));
       if($t.hasClass(BigText.EXEMPT_CLASS)) {
         // must be added to document to get font-size
         var defaultDocumentFontSize = parseInt($('<div/>').appendTo(document.body).css('font-size'), 10);
-        equal(defaultDocumentFontSize, fontSize, 'Line ' + j + ' Font size must be unchanged');
+        assert.equal(defaultDocumentFontSize, fontSize, 'Line ' + j + ' Font size must be unchanged');
       } else {
-        ok(fontSize > startingFontSize, 'Line ' + j + ' Font size must be larger than the starting pixel size');
-        ok(minWidth < width && width < maxWidth, 'Line ' + j + ' width should be about ' + expectedWidth + 'px (' + width + ')');
-        ok(minHeight < height && height < maxHeight, 'Line ' + j + ' height should be about ' + expectedHeight + 'px (' + minHeight + ' < ' + height + ' < ' + maxHeight + ')');
+        assert.ok(fontSize > startingFontSize, 'Line ' + j + ' Font size must be larger than the starting pixel size');
+        assert.ok(minWidth < width && width < maxWidth, 'Line ' + j + ' width should be about ' + expectedWidth + 'px (' + width + ')');
+        assert.ok(minHeight < height && height < maxHeight, 'Line ' + j + ' height should be about ' + expectedHeight + 'px (' + minHeight + ' < ' + height + ' < ' + maxHeight + ')');
       }
 
       $heightElement.remove();
     });
   };
 
-  test('testExists', function()
+  QUnit.test('testExists', function( assert )
   {
-    ok(!!BigText);
-    ok(!!$.fn.bigtext);
+    assert.ok(!!BigText);
+    assert.ok(!!$.fn.bigtext);
   });
 
-  test('testStyleInjection', function()
+  QUnit.test('testStyleInjection', function( assert )
   {
     $('#qunit-fixture').html('<div id="test" style="width:600px"><div>This is a simple test.</div></div>');
     $('#test').bigtext();
 
-    equal($('#' + BigText.getStyleId('test')).length, 1, 'Test to make sure the style tag was inserted.');
+    assert.equal($('#' + BigText.getStyleId('test')).length, 1, 'Test to make sure the style tag was inserted.');
   });
 
-  test('testDoubleStyleInjection', function()
+  QUnit.test('testDoubleStyleInjection', function( assert )
   {
     $('#qunit-fixture').html('<div id="test" style="width:600px"><div>This is a simple test.</div></div>');
     $('#test').bigtext().bigtext();
 
     // FIXME this jQuery result won't return more than one element.
-    ok($('#' + BigText.getStyleId('test')).length === 1, 'Test to make sure the style tag wasn\'t inserted twice.');
+    assert.ok($('#' + BigText.getStyleId('test')).length === 1, 'Test to make sure the style tag wasn\'t inserted twice.');
   });
 
 
-  test('testCleanup', function()
+  QUnit.test('testCleanup', function( assert )
   {
     $('#qunit-fixture').html('<div id="test" style="width:600px"><div>This is a simple test.</div></div>');
     $('#test').bigtext();
 
-    ok($('.bigtext-cloned').length === 0, 'Clone should be deleted.');
+    assert.ok($('.bigtext-cloned').length === 0, 'Clone should be deleted.');
   });
 
-  test('testOneLine', function()
+  QUnit.test('testOneLine', function( assert )
   {
     $('#qunit-fixture').html('<div id="test" style="width:600px"><div>This is a single line.</div></div>');
 
-    BigTextTest.linesTest('#test', 600);
+    BigTextTest.linesTest( assert, '#test', 600);
   });
 
-  test('testTwoLines', function()
+  QUnit.test('testTwoLines', function( assert )
   {
     $('#qunit-fixture').html('<div id="test" style="width:600px"><div>This is</div><div>a longer second line</div></div>');
 
-    BigTextTest.linesTest('#test', 600);
+    BigTextTest.linesTest( assert, '#test', 600);
   });
 
-  test('testThreeLines', function()
+  QUnit.test('testThreeLines', function( assert )
   {
     $('#qunit-fixture').html('<div id="test" style="width:600px"><div>This is</div><div>a longer second line</div><div>An even longer third line.</div></div>');
 
-    BigTextTest.linesTest('#test', 600);
+    BigTextTest.linesTest( assert, '#test', 600);
   });
 
-  test('testThreeLinesWithAList', function()
+  QUnit.test('testThreeLinesWithAList', function( assert )
   {
     $('#qunit-fixture').html('<ol id="test" style="width:600px"><li>This is</li><li>a longer second line</li><li>An even longer third line.</li></ol>');
 
-    BigTextTest.linesTest('#test', 600);
+    BigTextTest.linesTest( assert, '#test', 600);
   });
 
-  test('testTwoElements', function()
+  QUnit.test('testTwoElements', function( assert )
   {
     $('#qunit-fixture').html('<div id="test" style="width:600px"><div>This is</div><div>a longer second line</div></div><div id="test2" style="width:400px"><div>This is</div><div>a longer second line</div></div>');
 
-    BigTextTest.linesTest('#test', 600);
-    BigTextTest.linesTest('#test2', 400);
+    BigTextTest.linesTest( assert, '#test', 600);
+    BigTextTest.linesTest( assert, '#test2', 400);
 
-    notEqual($('#test').find('> div').eq(0).css('font-size'),
+    assert.notEqual($('#test').find('> div').eq(0).css('font-size'),
               $('#test2').find('> div').eq(0).css('font-size'),
               'Line 1 of each is a different size.');
 
-    notEqual($('#test').find('> div').eq(1).css('font-size'),
+    assert.notEqual($('#test').find('> div').eq(1).css('font-size'),
               $('#test2').find('> div').eq(1).css('font-size'),
               'Line 2 of each is a different size.');
   });
 
-  test('testPercentageWidth', function()
+  QUnit.test('testPercentageWidth', function( assert )
   {
     $('#qunit-fixture').html('<div style="width: 600px"><div id="test" style="width: 50%"><div>This is a single line.</div></div></div>');
 
-    BigTextTest.linesTest('#test', 300);
+    BigTextTest.linesTest( assert, '#test', 300);
   });
 
-  test('testNoChildren', function()
+  QUnit.test('testNoChildren', function( assert )
   {
     $('#qunit-fixture').html('<div id="test" style="width: 600px">This is a single line.</div>');
 
-    BigTextTest.linesTest('#test', 300);
+    BigTextTest.linesTest( assert, '#test', 300);
   });
 
-  test('testMaxFontSize', function()
+  QUnit.test('testMaxFontSize', function( assert )
   {
     $('#qunit-fixture').html('<div id="test" style="width:600px"><div>1</div></div>');
     $('#test').bigtext();
 
-    equal(BigText.DEFAULT_MAX_FONT_SIZE_PX + 'px',
+    assert.equal(BigText.DEFAULT_MAX_FONT_SIZE_PX + 'px',
       $('#test > div').css('font-size'),
       'Font size should equal the maximum.');
   });
 
-  test('testUnbrokenSingleWord', function()
+  QUnit.test('testUnbrokenSingleWord', function( assert )
   {
     $('#qunit-fixture').html('<div id="test" style="width:300px"><div>This</div></div>');
     var startingFontSize = parseInt($('#test > div').css('font-size'), 10);
     $('#test').bigtext();
 
-    ok(parseInt($('#test > div').css('font-size'), 10) > startingFontSize, 'Font size must be larger than the starting pixel size.');
+    assert.ok(parseInt($('#test > div').css('font-size'), 10) > startingFontSize, 'Font size must be larger than the starting pixel size.');
   });
 
-  test('testTwoLinesButOneExempt', function()
+  QUnit.test('testTwoLinesButOneExempt', function( assert )
   {
     $('#qunit-fixture').html('<div id="test" style="width:400px"><div>This is</div><div class="bigtext-exempt">a longer second line</div></div>');
 
-    BigTextTest.linesTest('#test', 400);
+    BigTextTest.linesTest( assert, '#test', 400);
   });
 
-  test('testExemptLineWithChild', function()
+  QUnit.test('testExemptLineWithChild', function( assert )
   {
     var defaultExemptLineFontSize,
       childFontSize,
@@ -217,28 +217,28 @@
     $test.bigtext();
     childFontSize = $exempt.css('font-size');
 
-    equal(defaultExemptLineFontSize, childFontSize, 'Exempt line\'s child font size must be unchanged');
+    assert.equal(defaultExemptLineFontSize, childFontSize, 'Exempt line\'s child font size must be unchanged');
   });
 
-  test('testIdCssSelectorStyle', function()
+  QUnit.test('testIdCssSelectorStyle', function( assert )
   {
     var id = 'test-style-insert';
     // Travic-CI / Ubuntu PhantomJS needed a font-family here (the default font wasn’t bolding correctly)
     $(document.head || 'head').append( '<style id="' + id + '">#test { width: 600px; font-family: Georgia; font-weight: bold; }</style>' );
     $('#qunit-fixture').html('<div id="test"><div>This is a single line.</div></div>');
 
-    BigTextTest.linesTest('#test', 600);
+    BigTextTest.linesTest( assert, '#test', 600);
     $('#' + id).remove();
   });
 
-  test('testMaxWidth', function()
+  QUnit.test('testMaxWidth', function( assert )
   {
     $('#qunit-fixture').html('<div id="test" style="max-width:600px"><div>This is a single line.</div></div>');
 
-    BigTextTest.linesTest('#test', 600);
+    BigTextTest.linesTest( assert, '#test', 600);
   });
 
-  test('testNoConflict', function()
+  QUnit.test('testNoConflict', function( assert )
   {
     $('#qunit-fixture').html('<div id="test" style="width:600px"><div>This is a single line.</div></div>');
 
@@ -250,70 +250,70 @@
     var defaultDocumentFontSize = $('<div/>').appendTo(document.body).css('font-size'),
       childFontSize = $('#test > div').css('font-size');
 
-    notEqual(defaultDocumentFontSize, childFontSize, 'Font size must not equal the default.');
+    assert.notEqual(defaultDocumentFontSize, childFontSize, 'Font size must not equal the default.');
   });
 
-  test('testMinFontSize', function()
+  QUnit.test('testMinFontSize', function( assert )
   {
     $('#qunit-fixture').html('<div id="test" style="width:600px"><div>This is a super long line that will probably be too long for this single line. This is a super long line that will probably be too long for this single line.</div></div>');
     $('#test').bigtext({
       minfontsize: 16
     });
 
-    equal('16px', $('#test > div').css('font-size'), 'Font size should equal the minimum.');
-    equal('normal', $('#test > div').css('white-space'), 'When minimum is set, word wrap should re-enable.');
+    assert.equal('16px', $('#test > div').css('font-size'), 'Font size should equal the minimum.');
+    assert.equal('normal', $('#test > div').css('white-space'), 'When minimum is set, word wrap should re-enable.');
   });
 
-  test('testChildClassReplace', function()
+  QUnit.test('testChildClassReplace', function( assert )
   {
     $('#qunit-fixture').html('<div id="test" style="width:600px"><div class="testbigtext-line1">This is a single line.</div></div>');
 
-    BigTextTest.linesTest('#test', 600);
-    ok($('#test > div').hasClass('testbigtext-line1'), 'First line should still have testbigtext-line1 class');
-    ok(!$('#test > div').hasClass('test'), 'First line should not have test class');
+    BigTextTest.linesTest( assert, '#test', 600);
+    assert.ok($('#test > div').hasClass('testbigtext-line1'), 'First line should still have testbigtext-line1 class');
+    assert.ok(!$('#test > div').hasClass('test'), 'First line should not have test class');
   });
 
-  test('testTextTransform', function()
+  QUnit.test('testTextTransform', function( assert )
   {
     $('#qunit-fixture').html('<div style="text-transform: uppercase"><div id="test" style="width:600px"><div class="testbigtext-line1">This is a single line.</div></div></div>');
 
-    BigTextTest.linesTest('#test', 600);
+    BigTextTest.linesTest( assert, '#test', 600);
   });
 
-  test('testWordSpacing', function()
+  QUnit.test('testWordSpacing', function( assert )
   {
     $('#qunit-fixture').html('<div style="word-spacing: 3px"><div id="test" style="width:600px"><div class="testbigtext-line1">This is a single line.</div></div></div>');
 
-    BigTextTest.linesTest('#test', 600);
+    BigTextTest.linesTest( assert, '#test', 600);
   });
 
-  test('testLetterSpacing', function()
+  QUnit.test('testLetterSpacing', function( assert )
   {
     $('#qunit-fixture').html('<div style="letter-spacing: 3px"><div id="test" style="width:600px"><div class="testbigtext-line1">This is a single line.</div></div></div>');
 
-    BigTextTest.linesTest('#test', 600);
+    BigTextTest.linesTest( assert, '#test', 600);
   });
 
-  test('testSizes', function()
+  QUnit.test('testSizes', function( assert )
   {
     for( var j = 200, k = 800; j<k; j += 50 ) {
       $('#qunit-fixture').html('<div id="test" style="width:' + j + 'px"><div>This is a single line.</div></div>');
 
-      BigTextTest.linesTest('#test', j);
+      BigTextTest.linesTest( assert, '#test', j);
     }
   });
 
-  test('testSpanChildren', function()
+  QUnit.test('testSpanChildren', function( assert )
   {
     $('#qunit-fixture').html('<div id="test" style="width:600px"><span>This is</span><span>a longer second line</span></div>');
 
-    BigTextTest.linesTest('#test', 600);
+    BigTextTest.linesTest( assert, '#test', 600);
   });
 
-  test('testMixtureChildren', function()
+  QUnit.test('testMixtureChildren', function( assert )
   {
     $('#qunit-fixture').html('<div id="test" style="width:600px"><div>This is</div><span>a longer second line</span></div>');
 
-    BigTextTest.linesTest('#test', 600);
+    BigTextTest.linesTest( assert, '#test', 600);
   });
 }( this, jQuery ));
