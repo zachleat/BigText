@@ -1,4 +1,4 @@
-/*! BigText - v1.0.0 - 2017-06-01
+/*! BigText - v1.0.1 - 2017-06-01
  * https://github.com/zachleat/bigtext
  * Copyright (c) 2017 Zach Leatherman (@zachleat)
  * MIT License */

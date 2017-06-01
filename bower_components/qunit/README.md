@@ -1,7 +1,9 @@
-[![Build Status](http://jenkins.jquery.com/job/QUnit/badge/icon)](http://jenkins.jquery.com/job/QUnit/)
-[![Coverage Status](https://coveralls.io/repos/jquery/qunit/badge.png)](https://coveralls.io/r/jquery/qunit)
+[![Travis Build Status](https://travis-ci.org/qunitjs/qunit.svg?branch=master)](https://travis-ci.org/qunitjs/qunit)
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/qunitjs/qunit?svg=true&branch=master)](https://ci.appveyor.com/project/leobalter/qunit)
+[![Coverage Status](https://coveralls.io/repos/qunitjs/qunit/badge.svg)](https://coveralls.io/github/qunitjs/qunit)
+[![Chat on Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/qunitjs/qunit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-# [QUnit](http://qunitjs.com) - A JavaScript Unit Testing Framework.
+# [QUnit](https://qunitjs.com) - A JavaScript Unit Testing Framework.
 
 QUnit is a powerful, easy-to-use, JavaScript unit testing framework. It's used by the jQuery
 project to test its code and plugins but is capable of testing any generic
@@ -23,41 +25,16 @@ with its stop/start facilities for testing asynchronous code.
 
 If you are interested in helping developing QUnit, you are in the right place.
 For related discussions, visit the
-[QUnit and Testing forum](http://forum.jquery.com/qunit-and-testing).
+[QUnit and Testing forum](https://forum.jquery.com/qunit-and-testing).
+You can also chat with us on [Gitter](https://gitter.im/qunitjs/qunit) if you
+need help using or developing QUnit.
 
 ## Development
 
 To submit patches, fork the repository, create a branch for the change. Then implement
-the change, run `grunt` to lint and test it, then commit, push and create a pull request.
+the change, run `npm test` to lint and test it, then commit, push and create a pull request.
 
 Include some background for the change in the commit message and `Fixes #nnn`, referring
 to the issue number you're addressing.
 
-To run `grunt`, you need [Node.js](http://nodejs.org/download/), which includes `npm`, then `npm install -g grunt-cli`. That gives you a global grunt binary. For additional grunt tasks, also run `npm install`.
-
-## Releases
-
-Use [jquery-release](https://github.com/jquery/jquery-release). The following aren't handled there, do that first:
-
-* Install [git-extras](https://github.com/visionmedia/git-extras) and run `git changelog` to update `History.md`. Clean up the changelog, removing merge commits, whitespace cleanups or other irrelevant commits.
-* Run `grunt authors` and add any new authors to AUTHORS.txt
-* Update the version property in `package.json` to have the right -pre version. Not necessary for patch releases.
-
-Commit these:
-
-	Build: Prepare @VERSION release, including authors and history update
-
-Then run the script:
-
-	node release.js --remote=jquery/qunit
-
-Update `jquery/qunitjs.com`, replacing previous versions with new ones:
-
-* pages/index.html
-* resources/*.html
-
-Update [GitHub releases](https://github.com/jquery/qunit/releases), use the changelog from `History.md`.
-
-Finally announce on Twitter @qunitjs (add highlights if possible, otherwise a 2nd tweet might do):
-
-	Released @VERSION: https://github.com/jquery/qunit/releases/tag/1.17.0
+To run `npm test`, you need [Node.js](https://nodejs.org/download/), which includes `npm`.

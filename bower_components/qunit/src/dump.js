@@ -1,8 +1,11 @@
+import config from "./core/config";
+import { inArray, toString, is } from "./core/utilities";
+
 // Based on jsDump by Ariel Flesler
 // http://flesler.blogspot.com/2008/05/jsdump-pretty-dump-of-any-javascript.html
-QUnit.dump = (function() {
+export default ( function() {
 	function quote( str ) {
-		return "\"" + str.toString().replace( /"/g, "\\\"" ) + "\"";
+		return "\"" + str.toString().replace( /\\/g, "\\\\" ).replace( /"/g, "\\\"" ) + "\"";
 	}
 	function literal( o ) {
 		return o + "";
@@ -35,17 +38,32 @@ QUnit.dump = (function() {
 		return join( "[", ret, "]" );
 	}
 
+	function isArray( obj ) {
+		return (
+
+			//Native Arrays
+			toString.call( obj ) === "[object Array]" ||
+
+			// NodeList objects
+			( typeof obj.length === "number" && obj.item !== undefined ) &&
+			( obj.length ?
+				obj.item( 0 ) === obj[ 0 ] :
+				( obj.item( 0 ) === null && obj[ 0 ] === undefined )
+			)
+		);
+	}
+
 	var reName = /^function (\w+)/,
 		dump = {
 
-			// objType is used mostly internally, you can fix a (custom) type in advance
+			// The objType is used mostly internally, you can fix a (custom) type in advance
 			parse: function( obj, objType, stack ) {
 				stack = stack || [];
 				var res, parser, parserType,
-					inStack = inArray( obj, stack );
+					objIndex = stack.indexOf( obj );
 
-				if ( inStack !== -1 ) {
-					return "recursion(" + ( inStack - stack.length ) + ")";
+				if ( objIndex !== -1 ) {
+					return `recursion(${objIndex - stack.length})`;
 				}
 
 				objType = objType || this.typeOf( obj  );
@@ -62,15 +80,16 @@ QUnit.dump = (function() {
 			},
 			typeOf: function( obj ) {
 				var type;
+
 				if ( obj === null ) {
 					type = "null";
 				} else if ( typeof obj === "undefined" ) {
 					type = "undefined";
-				} else if ( QUnit.is( "regexp", obj ) ) {
+				} else if ( is( "regexp", obj ) ) {
 					type = "regexp";
-				} else if ( QUnit.is( "date", obj ) ) {
+				} else if ( is( "date", obj ) ) {
 					type = "date";
-				} else if ( QUnit.is( "function", obj ) ) {
+				} else if ( is( "function", obj ) ) {
 					type = "function";
 				} else if ( obj.setInterval !== undefined &&
 						obj.document !== undefined &&
@@ -80,16 +99,7 @@ QUnit.dump = (function() {
 					type = "document";
 				} else if ( obj.nodeType ) {
 					type = "node";
-				} else if (
-
-					// native arrays
-					toString.call( obj ) === "[object Array]" ||
-
-					// NodeList objects
-					( typeof obj.length === "number" && obj.item !== undefined &&
-					( obj.length ? obj.item( 0 ) === obj[ 0 ] : ( obj.item( 0 ) === null &&
-					obj[ 0 ] === undefined ) ) )
-				) {
+				} else if ( isArray( obj ) ) {
 					type = "array";
 				} else if ( obj.constructor === Error.prototype.constructor ) {
 					type = "error";
@@ -98,10 +108,16 @@ QUnit.dump = (function() {
 				}
 				return type;
 			},
+
 			separator: function() {
-				return this.multiline ? this.HTML ? "<br />" : "\n" : this.HTML ? "&#160;" : " ";
+				if ( this.multiline ) {
+					return this.HTML ? "<br />" : "\n";
+				} else {
+					return this.HTML ? "&#160;" : " ";
+				}
 			},
-			// extra can be a number, shortcut for increasing-calling-decreasing
+
+			// Extra can be a number, shortcut for increasing-calling-decreasing
 			indent: function( extra ) {
 				if ( !this.multiline ) {
 					return "";
@@ -121,13 +137,13 @@ QUnit.dump = (function() {
 			setParser: function( name, parser ) {
 				this.parsers[ name ] = parser;
 			},
+
 			// The next 3 are exposed so you can use them
 			quote: quote,
 			literal: literal,
 			join: join,
-			//
 			depth: 1,
-			maxDepth: 5,
+			maxDepth: config.maxDepth,
 
 			// This is the list of parsers, to modify them, use dump.setParser
 			parsers: {
@@ -142,13 +158,13 @@ QUnit.dump = (function() {
 				"function": function( fn ) {
 					var ret = "function",
 
-						// functions never have name in IE
+						// Functions never have name in IE
 						name = "name" in fn ? fn.name : ( reName.exec( fn ) || [] )[ 1 ];
 
 					if ( name ) {
 						ret += " " + name;
 					}
-					ret += "( ";
+					ret += "(";
 
 					ret = [ ret, dump.parse( fn, "functionArgs" ), "){" ].join( "" );
 					return join( ret, dump.parse( fn, "functionCode" ), "}" );
@@ -174,7 +190,7 @@ QUnit.dump = (function() {
 					nonEnumerableProperties = [ "message", "name" ];
 					for ( i in nonEnumerableProperties ) {
 						key = nonEnumerableProperties[ i ];
-						if ( key in map && !( key in keys ) ) {
+						if ( key in map && !inArray( key, keys ) ) {
 							keys.push( key );
 						}
 					}
@@ -219,7 +235,7 @@ QUnit.dump = (function() {
 					return ret + open + "/" + tag + close;
 				},
 
-				// function calls it internally, it's the arguments part of the function
+				// Function calls it internally, it's the arguments part of the function
 				functionArgs: function( fn ) {
 					var args,
 						l = fn.length;
@@ -236,28 +252,34 @@ QUnit.dump = (function() {
 					}
 					return " " + args.join( ", " ) + " ";
 				},
-				// object calls it internally, the key part of an item in a map
+
+				// Object calls it internally, the key part of an item in a map
 				key: quote,
-				// function calls it internally, it's the content of the function
+
+				// Function calls it internally, it's the content of the function
 				functionCode: "[code]",
-				// node calls it internally, it's an html attribute value
+
+				// Node calls it internally, it's a html attribute value
 				attribute: quote,
 				string: quote,
 				date: quote,
 				regexp: literal,
 				number: literal,
-				"boolean": literal
+				"boolean": literal,
+				symbol: function( sym ) {
+					return sym.toString();
+				}
 			},
-			// if true, entities are escaped ( <, >, \t, space and \n )
+
+			// If true, entities are escaped ( <, >, \t, space and \n )
 			HTML: false,
-			// indentation unit
+
+			// Indentation unit
 			indentChar: "  ",
-			// if true, items in a collection, are separated by a \n, else just a space.
+
+			// If true, items in a collection, are separated by a \n, else just a space.
 			multiline: true
 		};
 
 	return dump;
-}());
-
-// back compat
-QUnit.jsDump = QUnit.dump;
+} )();

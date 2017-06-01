@@ -1,62 +1,37 @@
-// For browser, export only select globals
-if ( typeof window !== "undefined" ) {
+/* global module, exports, define */
+import { defined } from "./core/utilities";
+import { window } from "./globals";
 
-	// Deprecated
-	// Extend assert methods to QUnit and Global scope through Backwards compatibility
-	(function() {
-		var i,
-			assertions = Assert.prototype;
+export default function exportQUnit( QUnit ) {
 
-		function applyCurrent( current ) {
-			return function() {
-				var assert = new Assert( QUnit.config.current );
-				current.apply( assert, arguments );
-			};
+	if ( defined.document ) {
+
+	// QUnit may be defined when it is preconfigured but then only QUnit and QUnit.config may be defined.
+		if ( window.QUnit && window.QUnit.version ) {
+			throw new Error( "QUnit has already been defined." );
 		}
 
-		for ( i in assertions ) {
-			QUnit[ i ] = applyCurrent( assertions[ i ] );
-		}
-	})();
-
-	(function() {
-		var i, l,
-			keys = [
-				"test",
-				"module",
-				"expect",
-				"asyncTest",
-				"start",
-				"stop",
-				"ok",
-				"equal",
-				"notEqual",
-				"propEqual",
-				"notPropEqual",
-				"deepEqual",
-				"notDeepEqual",
-				"strictEqual",
-				"notStrictEqual",
-				"throws"
-			];
-
-		for ( i = 0, l = keys.length; i < l; i++ ) {
-			window[ keys[ i ] ] = QUnit[ keys[ i ] ];
-		}
-	})();
-
-	window.QUnit = QUnit;
-}
+		window.QUnit = QUnit;
+	}
 
 // For nodejs
-if ( typeof module !== "undefined" && module && module.exports ) {
-	module.exports = QUnit;
+	if ( typeof module !== "undefined" && module && module.exports ) {
+		module.exports = QUnit;
 
 	// For consistency with CommonJS environments' exports
-	module.exports.QUnit = QUnit;
-}
+		module.exports.QUnit = QUnit;
+	}
 
 // For CommonJS with exports, but without module.exports, like Rhino
-if ( typeof exports !== "undefined" && exports ) {
-	exports.QUnit = QUnit;
+	if ( typeof exports !== "undefined" && exports ) {
+		exports.QUnit = QUnit;
+	}
+
+	if ( typeof define === "function" && define.amd ) {
+		define( function() {
+			return QUnit;
+		} );
+		QUnit.config.autostart = false;
+	}
+
 }

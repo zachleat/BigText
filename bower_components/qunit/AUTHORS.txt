@@ -1,3 +1,5 @@
+Authors ordered by first contribution
+
 Jörn Zaefferer <joern.zaefferer@gmail.com>
 Ariel Flesler <aflesler@gmail.com>
 Scott González <scott.gonzalez@gmail.com>
@@ -23,7 +25,6 @@ Benjamin Lee <leebenjp@gmail.com>
 Paul Irish <paul.irish@gmail.com>
 Oleg Slobodskoi <oleg008@gmail.com>
 Anton Matzneller <obhvsbypqghgc@gmail.com>
-Aurélien Bombo <hellosexyprout@gmail.com>
 Mathias Bynens <mathias@qiwi.be>
 Erik Vold <erikvvold@gmail.com>
 Wesley Walser <waw325@gmail.com>
@@ -79,7 +80,7 @@ Leonardo Balter <leonardo.balter@gmail.com>
 Jeff Cooper <jeff@kickstorming.com>
 Corey Frang <gnarf37@gmail.com>
 Nathan Dauber <nathan@radialogica.com>
-Michał Gołębiowski <m.goleb@gmail.com>
+Michał Gołębiowski <m.goleb@gmail.com>
 XhmikosR <xhmikosr@yahoo.com>
 Patrick Stapleton <github@gdi2290.com>
 DarkPark <darkpark@pisem.net>
@@ -93,3 +94,48 @@ Mislav Marohnić <mislav.marohnic@gmail.com>
 Anne-Gaelle Colom <coloma@westminster.ac.uk>
 Leonardo Braga <leonardo.braga@gmail.com>
 Jon Bretman <jon.bretman@lyst.com>
+Jonny Buchanan <jonathan.buchanan@gmail.com>
+Adrian Phinney <adrian.phinney@gmail.com>
+Lam Chau <lamchau@gmail.com>
+Henning Beyer <bubens@unpunk.de>
+Jesús Leganés Combarro <piranna@gmail.com>
+Shivam Dixit <shivamd001@gmail.com>
+Gaurav Mittal <gaurav.mittal@students.iiit.ac.in>
+Kevin Partington <kevin.partington@kernelpanicstudios.com>
+Braulio Valdivielso Martínez <brlvldvlsmrtnz@gmail.com>
+Shinnosuke Watanabe <snnskwtnb@gmail.com>
+Aurelio De Rosa <aurelioderosa@gmail.com>
+Toh Chee Chuan <chuan@yokestudio.com>
+Stefan Penner <stefan.penner@gmail.com>
+Taehee Kim <slhyvaa@nate.com>
+YongWoo Jeon <yongwoo.jeon@navercorp.com>
+Stephen Jones <askelkana@gmail.com>
+Ralph Dugue <rdugue1@gmail.com>
+bianca c [arghgr] <tenmillionpeople@gmail.com>
+Erik Benoist <ebenoist@gmail.com>
+Sergio Cinos <sergio.cinos@gmail.com>
+Josh Soref <apache@soref.com>
+Jon Dufresne <jon.dufresne@gmail.com>
+Maksim Gudow <mmd1337@gmail.com>
+Trent Willis <twillis@linkedin.com>
+Frank Weigel <frank.weigel@sap.com>
+Jürg Lehni <juerg@scratchdisk.com>
+Frank Weigel <frank.weigel@sap.com>
+Maciej Lato <mlato@yahoo-inc.com>
+Shirish Kamath <shirishk.87@gmail.com>
+Parakleta <parakleta@darkreality.org>
+Daniel De Jager <danielmiester@gmail.com>
+Brahim Arkni <brahim.arkni@gmail.com>
+Cory Forsyth <cory.forsyth@gmail.com>
+Ed <proteenx11@gmail.com>
+yagni <yagni@users.noreply.github.com>
+Manoj Kumar <manoj@kumarmj.me>
+Tobias Oetzel <tobias.oetzel@sap.com>
+Ray Tiley <raytiley@gmail.com>
+Dustin Specker <dustinspecker@dustinspecker.com>
+Gaurav Munjal <gaurav9576@yahoo.com>
+Invis1ble <Invis1ble@users.noreply.github.com>
+David Chan <david@troi.org>
+Ryan T <ryanto@gmail.com>
+Ben Demboski <ben@turbopatent.com>
+NaridaL <adrianleonhard@gmail.com>
