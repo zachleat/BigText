@@ -45,7 +45,7 @@
       },
       bindResize: function(eventName, resizeFunction) {
         var timeoutId;
-        $(window).unbind(eventName).bind(eventName, function() {
+        $(window).off(eventName).on(eventName, function() {
           if( timeoutId ) {
             clearTimeout( timeoutId );
           }
