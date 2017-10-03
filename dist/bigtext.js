@@ -1,4 +1,4 @@
-/*! BigText - v1.0.0 - 2017-06-01
+/*! BigText - v1.0.1 - 2017-10-02
  * https://github.com/zachleat/bigtext
  * Copyright (c) 2017 Zach Leatherman (@zachleat)
  * MIT License */
@@ -50,7 +50,7 @@
       },
       bindResize: function(eventName, resizeFunction) {
         var timeoutId;
-        $(window).unbind(eventName).bind(eventName, function() {
+        $(window).off(eventName).on(eventName, function() {
           if( timeoutId ) {
             clearTimeout( timeoutId );
           }
