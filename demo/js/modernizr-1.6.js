@@ -798,7 +798,7 @@ window.Modernizr = (function(window,doc,undefined){
                       bool = f.checkValidity && f.checkValidity() === false;
                       
                     } else {
-                      // If the upgraded input compontent rejects the :) text, we got a winner
+                      // If the upgraded input component rejects the :) text, we got a winner
                       bool = f.value != smile;
                     }
                 }
