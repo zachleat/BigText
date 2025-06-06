@@ -22,11 +22,11 @@
     "url": "git://github.com/zachleat/bigtext.git"
   },
   "scripts": {
-    "test": "grunt test"
+    "build": "grunt",
+    "test": "grunt test",
+    "start": "grunt && http-server ."
   },
-  "dependencies": {},
   "devDependencies": {
-    "bower": "^1.8.0",
     "bytesize": "~0.2.0",
     "glob": "~7.1.2",
     "grunt": "~1.0.1",
@@ -42,10 +42,10 @@
     "grunt-lintspaces": "~0.8.1",
     "grunt-mkdir": "~1.0.0",
     "grunt-replace": "~1.0.1",
+    "http-server": "^14.1.1",
     "load-grunt-tasks": "~3.5.2",
     "matchdep": "~1.0.0"
   },
-  "peerDependencies": {},
   "engines": {
     "node": ">= 4",
     "npm": ">=1.2.10"
@@ -56,7 +56,6 @@
     "src": "src",
     "dist": "dist",
     "test": "test",
-    "demo": "demo",
-    "bower": "bower_components"
+    "demo": "demo"
   }
 }
